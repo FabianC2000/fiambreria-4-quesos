@@ -1,0 +1,1454 @@
+/* ============================================================
+   FIAMBRERÍA 4 QUESOS
+
+   DIRECCIÓN: mostrador de barrio con oficio — papel cálido,
+   tipografía con carácter y el color usado con cuentagotas.
+   IDEA DOMINANTE: la tipografía. El color acompaña, no grita.
+
+   Reglas que se respetan en todo el archivo:
+   · Una escala de espaciado (4 px) — sin valores sueltos
+   · Oro SÓLO sobre fondo oscuro o como relleno de botón; nunca
+     como texto sobre papel (no llega al contraste mínimo)
+   · Vino sólo para descuento/oferta. Ciruela sólo para
+     superficies oscuras e íconos sobre claro
+   · Se animan únicamente transform y opacity
+   · Las salidas son más rápidas que las entradas
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   0. TIPOGRAFÍAS
+   Servidas desde el propio proyecto (assets/fuentes/): el sitio
+   no depende de Google y funciona sin internet. Son variables,
+   así que un solo archivo cubre todos los pesos.
+   ------------------------------------------------------------ */
+@font-face{
+  font-family:"Fraunces";
+  src:url("../fuentes/fraunces-latin-wght-normal.woff2") format("woff2-variations");
+  font-weight:100 900;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family:"Inter";
+  src:url("../fuentes/inter-latin-wght-normal.woff2") format("woff2-variations");
+  font-weight:100 900;
+  font-style:normal;
+  font-display:swap;
+}
+
+/* ------------------------------------------------------------
+   1. TOKENS
+   ------------------------------------------------------------ */
+:root{
+  /* --- Color: un neutro cálido + un acento --- */
+  --tinta:#1B1420;            /* texto y superficies oscuras */
+  --tinta-2:#2A2130;          /* elevación sobre tinta */
+  --papel:#FBF8F4;            /* fondo del sitio */
+  --papel-2:#F4EEE7;          /* superficie alterna */
+  --blanco:#FFFFFF;           /* tarjetas */
+  --gris:#6B6159;             /* texto secundario — 5.2:1 sobre papel */
+  --gris-oscuro:#B9AEB6;      /* texto secundario sobre tinta — 7.4:1 */
+  --linea:#E6DED4;            /* bordes */
+
+  --ciruela:#4A2E56;          /* marca: barra de secciones, íconos */
+  --ciruela-2:#5E3C6D;
+  --oro:#E5A93C;              /* acción primaria y precio sobre oscuro */
+  --oro-2:#D1962C;
+  --vino:#7A1C28;             /* sólo descuentos y ofertas — 8.6:1 */
+
+  /* --- Tipografía --- */
+  --display:"Fraunces",Georgia,"Times New Roman",serif;
+  --texto:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+
+  /* Escala no lineal: cada salto se lee */
+  --t-xs:0.75rem;    /* 12 */
+  --t-s:0.875rem;    /* 14 */
+  --t-m:1rem;        /* 16 */
+  --t-l:1.25rem;     /* 20 */
+  --t-xl:1.75rem;    /* 28 */
+  --t-2xl:clamp(2rem,4vw,2.5rem);     /* 32 → 40 */
+  --t-3xl:clamp(2.25rem,6vw,3.5rem);  /* 36 → 56 */
+
+  /* --- Espaciado: escala de 4 --- */
+  --e-1:4px;  --e-2:8px;  --e-3:12px; --e-4:16px;
+  --e-5:24px; --e-6:32px; --e-7:48px; --e-8:64px; --e-9:96px;
+
+  /* --- Forma: un radio y su variante --- */
+  --r-s:6px;
+  --r:10px;
+  --r-l:18px;
+  --r-pill:999px;
+
+  /* --- Una sombra, suave y hacia abajo --- */
+  --sombra:0 1px 2px rgba(27,20,32,.05);
+  --sombra-alta:0 14px 30px -16px rgba(27,20,32,.35);
+
+  /* --- Movimiento --- */
+  --rapido:120ms;             /* hover, press */
+  --entrada:240ms;            /* modal, panel, popover */
+  --salida:150ms;             /* siempre más corta que la entrada */
+  --sale:cubic-bezier(.16,1,.3,1);      /* ease-out marcado */
+  --entra:cubic-bezier(.4,0,1,1);       /* ease-in */
+
+  --ancho:1180px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+
+body{
+  font-family:var(--texto);
+  font-size:var(--t-m);
+  background:var(--papel);
+  color:var(--tinta);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,select,textarea{font:inherit}
+ul{list-style:none}
+
+/* Foco visible propio — nunca outline:none sin reemplazo */
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid var(--oro);
+  outline-offset:2px;
+  border-radius:var(--r-s);
+}
+
+.contenedor{width:100%;max-width:var(--ancho);margin:0 auto;padding-left:var(--e-5);padding-right:var(--e-5)}
+
+/* ------------------------------------------------------------
+   2. TIPOGRAFÍA DE SECCIÓN
+   ------------------------------------------------------------ */
+.seccion{padding-top:var(--e-8);padding-bottom:var(--e-8)}
+.seccion-alterna{background:var(--papel-2)}
+.seccion-oscura{background:var(--tinta);color:var(--gris-oscuro)}
+.seccion-oscura .seccion-titulo{color:var(--blanco)}
+.seccion-oscura .seccion-bajada{color:var(--gris-oscuro)}
+.sin-tope{padding-top:0}
+
+/* Utilidades mínimas: todo valor sale de la escala de espaciado */
+.centrado{text-align:center}
+.mt-4{margin-top:var(--e-4)}
+.mt-5{margin-top:var(--e-5)}
+.mt-6{margin-top:var(--e-6)}
+.formulario-plano{padding:0}
+.logo-chico img{height:56px}
+
+.seccion-titulo{
+  font-family:var(--display);
+  font-size:var(--t-xl);
+  font-weight:600;
+  line-height:1.15;
+  letter-spacing:-.015em;
+}
+.seccion-bajada{
+  color:var(--gris);
+  font-size:var(--t-s);
+  margin-top:var(--e-1);
+  max-width:60ch;
+}
+.seccion-encabezado{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:var(--e-4);flex-wrap:wrap;margin-bottom:var(--e-6);
+}
+
+/* ------------------------------------------------------------
+   3. BOTONES
+   El hover y el active se resuelven con una capa que sólo
+   cambia de opacity: no se anima ni color ni sombra.
+   ------------------------------------------------------------ */
+.btn{
+  position:relative;isolation:isolate;overflow:hidden;
+  display:inline-flex;align-items:center;justify-content:center;gap:var(--e-2);
+  padding:var(--e-3) var(--e-5);
+  border-radius:var(--r-pill);
+  font-size:var(--t-s);font-weight:600;letter-spacing:-.005em;
+  white-space:nowrap;
+  transition:transform var(--rapido) var(--sale);
+}
+.btn::after{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:var(--tinta);opacity:0;
+  transition:opacity var(--rapido) var(--sale);
+}
+.btn:hover::after{opacity:.1}
+.btn:active{transform:scale(.97)}
+.btn:active::after{opacity:.16}
+
+.btn-oro{background:var(--oro);color:var(--tinta)}
+.btn-ciruela{background:var(--ciruela);color:var(--blanco)}
+.btn-vino{background:var(--vino);color:var(--blanco)}
+.btn-linea{border:1px solid var(--linea);color:var(--tinta);background:var(--blanco)}
+.btn-linea-claro{border:1px solid rgba(255,255,255,.35);color:var(--blanco)}
+.btn-linea-claro::after{background:var(--blanco)}
+.btn-bloque{width:100%}
+
+/* ------------------------------------------------------------
+   4. HEADER  (assets/js/header.js lo inyecta)
+   ------------------------------------------------------------ */
+
+/* 4.1 Barra superior */
+.barra-superior{background:var(--tinta);color:var(--gris-oscuro);font-size:var(--t-xs)}
+.barra-superior .contenedor{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:var(--e-4);min-height:36px;
+}
+.barra-superior-izq{display:flex;align-items:center;gap:var(--e-5)}
+.barra-dato{display:flex;align-items:center;gap:var(--e-2)}
+.barra-dato svg{width:14px;height:14px;flex:none;stroke:var(--oro)}
+.barra-dato strong{color:var(--blanco);font-weight:500}
+.barra-superior-der{display:flex;align-items:center;gap:var(--e-4)}
+.barra-superior-der a:hover{color:var(--blanco)}
+
+/* 4.2 Header principal */
+.header-principal{background:var(--tinta-2);padding-top:var(--e-4);padding-bottom:var(--e-4)}
+.header-grid{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--e-6)}
+
+.logo{display:flex;align-items:center;gap:var(--e-3)}
+.logo img{height:64px;width:auto}
+.logo-texto{display:flex;flex-direction:column;line-height:1}
+.logo-texto .l1{
+  font-family:var(--display);font-size:var(--t-l);font-weight:600;
+  color:var(--oro);letter-spacing:-.02em;
+}
+.logo-texto .l2{
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--gris-oscuro);margin-top:var(--e-1);
+}
+
+/* 4.3 Buscador */
+.buscador{position:relative;width:100%;max-width:520px;margin:0 auto}
+.buscador form{display:flex;background:var(--blanco);border-radius:var(--r-pill);overflow:hidden}
+.buscador input{
+  flex:1;min-width:0;border:0;background:transparent;color:var(--tinta);
+  padding:var(--e-3) var(--e-4);font-size:var(--t-s);outline:none;
+}
+.buscador input::placeholder{color:var(--gris)}
+.buscador input:focus-visible{outline:none}
+.buscador form:focus-within{box-shadow:0 0 0 2px var(--oro)}
+.buscador button{
+  position:relative;isolation:isolate;overflow:hidden;
+  background:var(--oro);color:var(--tinta);padding-left:var(--e-5);padding-right:var(--e-5);
+  display:grid;place-items:center;
+}
+.buscador button::after{
+  content:"";position:absolute;inset:0;z-index:-1;background:var(--tinta);
+  opacity:0;transition:opacity var(--rapido) var(--sale);
+}
+.buscador button:hover::after{opacity:.1}
+.buscador button svg{width:18px;height:18px}
+
+/* 4.4 Sugerencias — crecen desde el buscador, no desde el centro */
+.sugerencias{
+  position:absolute;top:calc(100% + var(--e-2));left:0;right:0;z-index:60;
+  background:var(--blanco);border:1px solid var(--linea);border-radius:var(--r);
+  box-shadow:var(--sombra-alta);overflow:hidden;
+  transform-origin:top center;
+  transform:translateY(-4px) scale(.98);opacity:0;visibility:hidden;
+  transition:opacity var(--salida) var(--entra),transform var(--salida) var(--entra),visibility 0s linear var(--salida);
+}
+.sugerencias.abierto{
+  transform:none;opacity:1;visibility:visible;
+  transition:opacity var(--entrada) var(--sale),transform var(--entrada) var(--sale),visibility 0s;
+}
+.sugerencia{
+  display:flex;align-items:center;gap:var(--e-3);
+  padding:var(--e-3) var(--e-4);border-bottom:1px solid var(--linea);
+}
+.sugerencia:last-child{border-bottom:0}
+.sugerencia:hover,.sugerencia:focus-visible{background:var(--papel-2)}
+.sugerencia img{width:40px;height:40px;object-fit:cover;border-radius:var(--r-s);flex:none}
+.sugerencia-nombre{font-size:var(--t-s);font-weight:600}
+.sugerencia-cat{font-size:var(--t-xs);color:var(--gris)}
+.sugerencia-precio{margin-left:auto;font-weight:600;font-size:var(--t-s);flex:none}
+.sugerencias-vacio{padding:var(--e-4);font-size:var(--t-s);color:var(--gris);text-align:center}
+
+/* 4.5 Acciones */
+.header-acciones{display:flex;align-items:center;gap:var(--e-1)}
+.accion{
+  position:relative;isolation:isolate;overflow:hidden;
+  display:flex;align-items:center;gap:var(--e-2);
+  padding:var(--e-2) var(--e-3);border-radius:var(--r-pill);color:var(--blanco);
+}
+.accion::after{
+  content:"";position:absolute;inset:0;z-index:-1;background:var(--blanco);
+  opacity:0;transition:opacity var(--rapido) var(--sale);
+}
+.accion:hover::after{opacity:.08}
+.accion svg{width:22px;height:22px;flex:none}
+.accion-texto{display:flex;flex-direction:column;line-height:1.2;text-align:left}
+.accion-texto .chico{font-size:var(--t-xs);color:var(--gris-oscuro)}
+.accion-texto .grande{font-size:var(--t-s);font-weight:600}
+
+.contador-carrito{
+  position:absolute;top:0;right:var(--e-1);
+  min-width:18px;height:18px;padding:0 5px;
+  background:var(--vino);color:var(--blanco);border:2px solid var(--tinta-2);
+  border-radius:var(--r-pill);
+  font-size:10px;font-weight:700;line-height:1;
+  display:grid;place-items:center;
+  transition:transform var(--rapido) var(--sale);
+}
+.contador-carrito.late{transform:scale(1.35)}
+
+.btn-menu{display:none;width:40px;height:40px;border-radius:var(--r-s);color:var(--blanco);place-items:center}
+.btn-menu svg{width:24px;height:24px}
+
+/* 4.6 Barra de secciones */
+.barra-secciones{
+  background:var(--ciruela);position:sticky;top:0;z-index:50;
+}
+.barra-secciones .contenedor{display:flex;align-items:center}
+.barra-secciones-lista{display:flex;align-items:center;flex:1}
+.barra-secciones-lista > :is(a,.abre-menu){
+  position:relative;
+  display:flex;align-items:center;gap:var(--e-2);
+  padding:var(--e-3) var(--e-4);
+  color:#EBE4EE;font-size:var(--t-s);font-weight:500;
+}
+.barra-secciones-lista > :is(a,.abre-menu) svg{width:16px;height:16px;opacity:.75}
+.barra-secciones-lista > :is(a,.abre-menu)::after{
+  content:"";position:absolute;left:var(--e-4);right:var(--e-4);bottom:0;height:2px;
+  background:var(--oro);transform:scaleX(0);transform-origin:left;
+  transition:transform var(--rapido) var(--sale);
+}
+.barra-secciones-lista > :is(a,.abre-menu):hover{color:var(--blanco)}
+.barra-secciones-lista > :is(a,.abre-menu):hover::after{transform:scaleX(1)}
+.barra-secciones-lista > :is(a,.abre-menu).activo{color:var(--blanco)}
+.barra-secciones-lista > :is(a,.abre-menu).activo::after{transform:scaleX(1)}
+
+/* 4.7 Menú guiado de categorías
+   Tres niveles con flecha: categoría › subcategoría › producto.
+   En escritorio son tres columnas; en celular un recorrido de a
+   un nivel (ver el bloque responsive). */
+.abre-menu .chevron{display:inline-flex;transition:transform var(--rapido) var(--sale)}
+.abre-menu .chevron svg{width:13px;height:13px;opacity:.75}
+.abre-menu[aria-expanded="true"] .chevron{transform:rotate(180deg)}
+.abre-menu[aria-expanded="true"]{color:var(--blanco)}
+.abre-menu[aria-expanded="true"]::after{transform:scaleX(1)}
+
+.megamenu{
+  position:absolute;top:100%;left:0;right:0;z-index:60;
+  background:var(--blanco);box-shadow:var(--sombra-alta);
+  transform-origin:top center;transform:translate3d(0,-6px,0);opacity:0;
+  transition:opacity var(--salida) var(--entra),transform var(--salida) var(--entra);
+}
+.megamenu.abierto{
+  transform:none;opacity:1;
+  transition:opacity var(--entrada) var(--sale),transform var(--entrada) var(--sale);
+}
+.megamenu-caja{
+  max-width:var(--ancho);margin:0 auto;padding:var(--e-5);
+  display:grid;grid-template-columns:1.1fr 1fr 1.5fr;gap:var(--e-5);align-items:start;
+}
+.mm-nivel{min-width:0}
+.mm-nivel + .mm-nivel{border-left:1px solid var(--linea);padding-left:var(--e-5)}
+.mm-titulo{
+  font-size:var(--t-xs);font-weight:600;color:var(--gris);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:var(--e-3);
+}
+/* Con 14 categorías la columna ya no entra en una pantalla de
+   notebook, así que las tres listas se desplazan. El padding de 2px
+   es para que el recuadro de foco del primer ítem no quede cortado
+   contra el borde del área que se desplaza. */
+.mm-lista{
+  display:flex;flex-direction:column;gap:2px;
+  max-height:min(56vh,430px);overflow-y:auto;padding:2px;
+}
+
+.mm-opcion{
+  width:100%;display:flex;align-items:center;gap:var(--e-3);
+  padding:var(--e-2) var(--e-3);border-radius:var(--r-s);text-align:left;
+}
+/* Ícono dibujado, no foto: a 19 píxeles una foto de producto no se
+   distingue, y además el dibujo toma el color del tema. */
+.mm-icono{
+  flex:none;display:grid;place-items:center;width:34px;height:34px;
+  border-radius:var(--r-s);background:var(--papel-2);color:var(--ciruela);
+}
+.mm-icono svg{width:19px;height:19px}
+/* Si la categoría tiene foto en vez de dibujo, llena el recuadro */
+.mm-icono img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.mm-opcion:hover .mm-icono,.mm-opcion.activo .mm-icono{background:var(--ciruela);color:var(--blanco)}
+/* Las fotos vienen sin fondo, así que el recuadro queda blanco
+   siempre: sobre el violeta de la categoría activa se vería la
+   sombra del producto recortada contra el color. */
+.mm-icono:has(img),
+.mm-opcion:hover .mm-icono:has(img),
+.mm-opcion.activo .mm-icono:has(img){background:var(--blanco)}
+.mm-texto{display:flex;flex-direction:column;min-width:0;flex:1}
+.mm-nombre{font-size:var(--t-s);font-weight:600;line-height:1.3}
+.mm-detalle{font-size:var(--t-xs);color:var(--gris);line-height:1.3}
+.mm-flecha{
+  flex:none;display:inline-flex;opacity:0;transform:translate3d(-4px,0,0);
+  transition:opacity var(--rapido) var(--sale),transform var(--rapido) var(--sale);
+}
+.mm-flecha svg{width:16px;height:16px;stroke:var(--ciruela)}
+.mm-opcion:hover,.mm-opcion.activo{background:var(--papel-2)}
+.mm-opcion.activo .mm-nombre{color:var(--ciruela)}
+.mm-opcion:hover .mm-flecha,.mm-opcion.activo .mm-flecha,
+.mm-opcion:focus-visible .mm-flecha{opacity:1;transform:none}
+
+.mm-producto{display:flex;align-items:center;gap:var(--e-3);padding:var(--e-2) var(--e-3);border-radius:var(--r-s)}
+.mm-producto:hover{background:var(--papel-2)}
+.mm-producto img{width:40px;height:40px;flex:none;object-fit:cover;border-radius:var(--r-s)}
+.mm-precio{flex:none;font-size:var(--t-s);font-weight:700}
+
+.mm-ver-todo{
+  display:inline-flex;align-items:center;gap:var(--e-2);margin-top:var(--e-4);
+  font-size:var(--t-s);font-weight:600;color:var(--ciruela);
+}
+.mm-ver-todo svg{width:15px;height:15px;transition:transform var(--rapido) var(--sale)}
+.mm-ver-todo:hover svg{transform:translate3d(3px,0,0)}
+.mm-vacio{padding:var(--e-3);font-size:var(--t-s);color:var(--gris)}
+.mm-volver{display:none}
+
+/* ------------------------------------------------------------
+   5. PORTADA
+   Lo primero que se ve es UNA cosa: el banner de oferta.
+   Todo lo demás baja de volumen.
+   ------------------------------------------------------------ */
+.portada{padding-top:var(--e-6);padding-bottom:var(--e-6)}
+
+.ofertas-portada{display:grid;grid-template-columns:1.9fr 1fr;gap:var(--e-4)}
+/* Con 3 ofertas y ninguna lateral, el banner ocupa todo el ancho */
+.ofertas-portada.solo-banner{grid-template-columns:1fr}
+.ofertas-portada.solo-banner .ofertas-laterales{display:none}
+.banner-precio .ahora.consultar{font-size:var(--t-m);font-weight:600}
+
+.banner-rotativo{
+  position:relative;border-radius:var(--r-l);overflow:hidden;background:var(--tinta);
+  /* Los banners son 16:9: con esta proporción se ven enteros y no
+     se corta el texto que traen dibujado */
+  aspect-ratio:16/9;
+}
+.banner-capa-min{
+  padding:var(--e-4) var(--e-5);
+  background:linear-gradient(to top,rgba(14,10,16,.88),rgba(14,10,16,.45) 60%,transparent);
+}
+.banner-slide{
+  position:absolute;inset:0;display:flex;align-items:flex-end;
+  opacity:0;visibility:hidden;
+  transition:opacity var(--salida) var(--entra),visibility 0s linear var(--salida);
+}
+.banner-slide.activo{
+  opacity:1;visibility:visible;
+  transition:opacity var(--entrada) var(--sale),visibility 0s;
+}
+.banner-slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.banner-capa{
+  position:relative;width:100%;padding:var(--e-7) var(--e-6) var(--e-6);
+  background:linear-gradient(to top,rgba(14,10,16,.94) 15%,rgba(14,10,16,.55) 65%,transparent);
+  color:var(--blanco);
+}
+.banner-etiqueta{
+  display:inline-block;background:var(--vino);color:var(--blanco);
+  font-size:var(--t-xs);font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  padding:var(--e-1) var(--e-3);border-radius:var(--r-pill);margin-bottom:var(--e-3);
+}
+.banner-titulo{
+  font-family:var(--display);font-weight:600;
+  font-size:var(--t-2xl);line-height:1.05;letter-spacing:-.025em;
+  max-width:18ch;
+}
+.banner-texto{
+  font-size:var(--t-s);color:var(--gris-oscuro);margin-top:var(--e-2);max-width:48ch;
+}
+.banner-precio{display:flex;align-items:baseline;gap:var(--e-3);margin-top:var(--e-4)}
+.banner-precio .ahora{font-size:var(--t-xl);font-weight:700;color:var(--oro);letter-spacing:-.02em}
+.banner-precio .antes{font-size:var(--t-s);color:var(--gris-oscuro);text-decoration:line-through}
+.banner-acciones{display:flex;gap:var(--e-2);margin-top:var(--e-5);flex-wrap:wrap}
+
+.banner-puntos{position:absolute;bottom:var(--e-4);right:var(--e-5);display:flex;gap:var(--e-2);z-index:4}
+.banner-puntos button{
+  width:8px;height:8px;border-radius:var(--r-pill);background:rgba(255,255,255,.4);
+  transition:transform var(--rapido) var(--sale),background-color var(--rapido) var(--sale);
+}
+.banner-puntos button:hover{background:rgba(255,255,255,.7)}
+.banner-puntos button.activo{background:var(--oro);transform:scaleX(3);transform-origin:center}
+
+/* Tarjetas laterales: mismo objeto, menos volumen */
+.ofertas-laterales{display:grid;gap:var(--e-4);grid-template-rows:1fr 1fr}
+.tarjeta-oferta{
+  position:relative;border-radius:var(--r-l);overflow:hidden;
+  background:var(--ciruela);min-height:202px;display:flex;align-items:flex-end;
+  transition:transform var(--rapido) var(--sale);
+}
+.tarjeta-oferta:hover{transform:translateY(-2px)}
+.tarjeta-oferta img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tarjeta-oferta .banner-capa{padding:var(--e-5) var(--e-4) var(--e-4)}
+.tarjeta-oferta .banner-titulo{font-size:var(--t-m);line-height:1.2;max-width:22ch}
+.tarjeta-oferta .banner-precio{margin-top:var(--e-2)}
+.tarjeta-oferta .banner-precio .ahora{font-size:var(--t-m)}
+
+/* Variante de la página de ofertas: mismo objeto, más aire */
+.tarjeta-oferta-grande{min-height:260px}
+.tarjeta-oferta-grande .banner-titulo{font-size:var(--t-l);line-height:1.15}
+.tarjeta-oferta-grande .banner-precio .ahora{font-size:var(--t-l)}
+.tarjeta-oferta-grande:hover{transform:none}
+
+.grilla-ofertas{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:var(--e-4)}
+
+/* 5.2 Cinta de datos: una línea, sin cajas ni sombras */
+.cinta-fila{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:var(--e-5);margin-top:var(--e-5);
+  padding-top:var(--e-5);border-top:1px solid var(--linea);
+}
+.cinta{display:flex;align-items:flex-start;gap:var(--e-3)}
+.cinta svg{width:20px;height:20px;stroke:var(--ciruela);flex:none;margin-top:2px}
+.cinta h4{font-size:var(--t-s);font-weight:600}
+.cinta p{font-size:var(--t-xs);color:var(--gris)}
+
+/* ------------------------------------------------------------
+   6. CARRUSEL AUTOMÁTICO
+   Se mueve solo, en bucle, sin flechas. Se frena al pasar el
+   mouse o al llegar con el teclado, y se desactiva entero si
+   el sistema pide menos movimiento.
+   ------------------------------------------------------------ */
+.carrusel{
+  position:relative;overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
+}
+.carrusel-pista{
+  display:flex;gap:var(--e-4);width:max-content;
+  animation:desplazar var(--duracion,48s) linear infinite;
+}
+.carrusel:hover .carrusel-pista,
+.carrusel:focus-within .carrusel-pista{animation-play-state:paused}
+/* Las cintas que quedaron fuera de la pantalla se frenan solas */
+.carrusel-pista.quieta{animation-play-state:paused}
+/* ------------------------------------------------------------
+   CINTA CON FLECHAS (ofertas.html)
+   Scroll horizontal con enganche: las flechas lo mueven de a una
+   tarjeta y en el celular se arrastra con el dedo. El scroll real
+   es lo que hace que funcione con teclado y con dedo sin código
+   aparte. La barra se oculta porque las flechas ya dicen que esto
+   se mueve.
+   ------------------------------------------------------------ */
+.cinta-manual{position:relative}
+.cinta-manual-pista{
+  display:flex;gap:var(--e-4);overflow-x:auto;
+  scroll-snap-type:x proximity;scroll-behavior:smooth;
+  padding:2px 2px var(--e-3);
+  scrollbar-width:none;-ms-overflow-style:none;
+}
+.cinta-manual-pista::-webkit-scrollbar{display:none}
+.cinta-manual-pista .tarjeta-producto{flex:0 0 230px;width:230px;scroll-snap-align:start}
+
+.cinta-flecha{
+  position:absolute;top:34%;z-index:3;
+  width:42px;height:42px;border-radius:50%;display:grid;place-items:center;
+  background:var(--blanco);border:1px solid var(--linea);color:var(--ciruela);
+  box-shadow:var(--sombra-alta);
+  transition:transform var(--rapido) var(--sale),opacity var(--rapido) var(--sale);
+}
+.cinta-flecha.izq{left:-14px}
+.cinta-flecha.der{right:-14px}
+.cinta-flecha svg{width:18px;height:18px}
+.cinta-flecha:hover{transform:scale(1.07)}
+.cinta-flecha:active{transform:scale(.96)}
+/* En la punta no se esconde: se apaga, así no salta el layout */
+.cinta-flecha[disabled]{opacity:.3;pointer-events:none}
+/* Si entran todas las tarjetas no hay nada que mover */
+.cinta-manual.sin-flechas .cinta-flecha{display:none}
+
+/* ------------------------------------------------------------
+   PÁGINAS DE TEXTO (quiénes somos, políticas, términos)
+   Medida de lectura acotada: a 1200 px de ancho un párrafo se
+   vuelve ilegible porque el ojo pierde el renglón al volver.
+   ------------------------------------------------------------ */
+.texto-largo{max-width:68ch}
+.texto-largo h2{
+  font-family:var(--display);font-size:var(--t-l);letter-spacing:-.01em;
+  margin-top:var(--e-7);margin-bottom:var(--e-3);
+}
+.texto-largo h2:first-child{margin-top:0}
+.texto-largo p{color:var(--gris-oscuro,inherit);line-height:1.65;margin-bottom:var(--e-4)}
+
+/* La vista por rubros del catálogo usa los mismos bloques que las
+   ofertas agrupadas: un título, el link al rubro y la cinta. */
+.catalogo-rubros{display:block}
+.grupo-ofertas + .grupo-ofertas{margin-top:var(--e-7)}
+.grupo-cabecera{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:var(--e-4);margin-bottom:var(--e-4);
+}
+.grupo-cabecera h3{font-family:var(--display);font-size:var(--t-l);letter-spacing:-.01em}
+.grupo-link{
+  display:inline-flex;align-items:center;gap:var(--e-2);flex:none;
+  font-size:var(--t-s);font-weight:600;color:var(--ciruela);
+}
+.grupo-link svg{width:15px;height:15px;transition:transform var(--rapido) var(--sale)}
+.grupo-link:hover svg{transform:translate3d(3px,0,0)}
+
+/* Grilla que ocupa el lugar de una cinta con pocos productos:
+   necesita el margen que le daría .contenedor. */
+.grilla-suelta{
+  width:100%;max-width:var(--ancho);margin:0 auto;
+  padding-left:var(--e-5);padding-right:var(--e-5);
+}
+@keyframes desplazar{
+  from{transform:translate3d(0,0,0)}
+  to{transform:translate3d(-50%,0,0)}
+}
+
+/* ------------------------------------------------------------
+   7. TARJETA DE PRODUCTO
+   ------------------------------------------------------------ */
+.grilla-productos{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:var(--e-4);
+}
+.tarjeta-producto{
+  position:relative;
+  background:var(--blanco);border:1px solid var(--linea);border-radius:var(--r);
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:transform var(--rapido) var(--sale);
+}
+/* La sombra del hover es una capa que sólo cambia de opacity */
+.tarjeta-producto::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:var(--sombra-alta);opacity:0;
+  transition:opacity var(--rapido) var(--sale);
+}
+.tarjeta-producto:hover{transform:translateY(-2px)}
+.tarjeta-producto:hover::after{opacity:1}
+.carrusel-pista .tarjeta-producto{width:230px;flex:0 0 230px}
+
+.producto-figura{position:relative;aspect-ratio:1/1;background:var(--papel-2);overflow:hidden}
+.producto-figura img{width:100%;height:100%;object-fit:cover}
+
+.insignia{
+  position:absolute;top:var(--e-3);left:var(--e-3);z-index:2;
+  background:var(--vino);color:var(--blanco);
+  font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px var(--e-2);border-radius:var(--r-pill);
+}
+.insignia.nuevo{background:var(--ciruela)}
+
+.producto-cuerpo{padding:var(--e-4);display:flex;flex-direction:column;gap:var(--e-2);flex:1}
+.producto-marca{font-size:10px;color:var(--gris);text-transform:uppercase;letter-spacing:.1em}
+.producto-nombre{font-size:var(--t-s);font-weight:600;line-height:1.35}
+.producto-selector{
+  width:100%;border:1px solid var(--linea);border-radius:var(--r-s);
+  padding:var(--e-2) var(--e-2);font-size:var(--t-xs);color:var(--gris);
+  background:var(--papel);cursor:pointer;
+}
+.producto-pie{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:var(--e-3);margin-top:auto;padding-top:var(--e-2);
+}
+.producto-precio{display:flex;flex-direction:column;line-height:1.1}
+.linea-precio{display:flex;align-items:baseline;gap:var(--e-2);flex-wrap:wrap}
+.producto-precio .antes{font-size:var(--t-xs);color:var(--gris);text-decoration:line-through}
+.producto-precio .valor{font-size:var(--t-l);font-weight:700;letter-spacing:-.02em}
+.producto-precio .unidad{font-size:var(--t-xs);color:var(--gris);margin-top:2px}
+
+.btn-agregar{
+  position:relative;isolation:isolate;overflow:hidden;
+  width:40px;height:40px;flex:none;border-radius:var(--r-pill);
+  background:var(--oro);color:var(--tinta);display:grid;place-items:center;
+  transition:transform var(--rapido) var(--sale);
+}
+.btn-agregar::after{
+  content:"";position:absolute;inset:0;z-index:-1;background:var(--tinta);
+  opacity:0;transition:opacity var(--rapido) var(--sale);
+}
+.btn-agregar:hover::after{opacity:.12}
+.btn-agregar:active{transform:scale(.92)}
+.btn-agregar svg{width:18px;height:18px}
+
+/* ------------------------------------------------------------
+   8. CATEGORÍAS
+   ------------------------------------------------------------ */
+/* 230px da 4 columnas exactas: 8 categorías entran en 2 filas
+   parejas, sin huecos sueltos al final */
+.grilla-categorias{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:var(--e-4)}
+/* La tarjeta de categoría muestra el ícono dibujado, no una foto:
+   el retrato de producto recortado se veía sucio y cada categoría
+   quedaba con un encuadre distinto. El dibujo da una sola lectura. */
+.tarjeta-categoria{
+  position:relative;border-radius:var(--r);overflow:hidden;
+  display:flex;flex-direction:column;
+  background:var(--blanco);border:1px solid var(--linea);
+  transition:transform var(--rapido) var(--sale);
+}
+.tarjeta-categoria::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:var(--sombra-alta);opacity:0;transition:opacity var(--rapido) var(--sale);
+}
+.tarjeta-categoria:hover{transform:translateY(-2px)}
+.tarjeta-categoria:hover::after{opacity:1}
+/* Cuadrado, no apaisado: las fotos de categoría son cuadradas, así
+   llenan el recuadro sin bandas blancas a los costados.
+   min-height:0 porque si no la altura la termina decidiendo el alto
+   real del archivo en vez de esta proporción. */
+.cat-figura{
+  aspect-ratio:1/1;min-height:0;overflow:hidden;
+  display:grid;grid-template:minmax(0,1fr) / minmax(0,1fr);place-items:center;
+  background:var(--papel-2);color:var(--ciruela);
+}
+.cat-figura svg{
+  width:46px;height:46px;
+  transition:transform var(--rapido) var(--sale);
+}
+/* La foto es cuadrada y el recuadro de la tarjeta es 16:9: con
+   cover se comería la mitad del producto, así que entra entera
+   (contain) sobre fondo blanco, que es el de las fotos. */
+.cat-figura:has(img){background:var(--blanco)}
+.cat-figura img{
+  width:100%;height:100%;object-fit:contain;padding:var(--e-2);
+  transition:transform var(--rapido) var(--sale);
+}
+.tarjeta-categoria:hover .cat-figura svg,
+.tarjeta-categoria:hover .cat-figura img{transform:scale(1.08)}
+.cat-pie{padding:var(--e-3) var(--e-4) var(--e-4);border-top:1px solid var(--linea)}
+.cat-pie h3{font-family:var(--display);font-size:var(--t-m);font-weight:600;letter-spacing:-.01em}
+.cat-pie span{font-size:var(--t-xs);color:var(--gris)}
+
+/* Tira de accesos rápidos de la portada. Ícono dibujado adentro
+   de un círculo y el nombre abajo. En pantalla ancha entran
+   todas; cuando no entran se desliza en horizontal en vez de
+   apilarse, así no empuja el resto de la portada hacia abajo. */
+.tira-categorias{
+  display:flex;gap:var(--e-5);overflow-x:auto;
+  padding-bottom:var(--e-3);scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;
+}
+.tira-item{
+  flex:0 0 auto;width:92px;scroll-snap-align:start;
+  display:flex;flex-direction:column;align-items:center;gap:var(--e-2);
+  text-align:center;
+}
+.tira-ico{
+  width:62px;height:62px;flex:none;display:grid;place-items:center;
+  border-radius:50%;background:var(--papel-2);border:1px solid var(--linea);
+  color:var(--ciruela);
+  transition:transform var(--rapido) var(--sale);
+}
+.tira-ico svg{width:28px;height:28px}
+/* La foto llena el círculo entero; el dibujo va más chico adentro */
+.tira-ico img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.tira-ico:has(img){background:var(--blanco);padding:0}
+.tira-item:hover .tira-ico,.tira-item:focus-visible .tira-ico{transform:translateY(-3px)}
+.tira-nombre{
+  font-size:var(--t-xs);font-weight:600;line-height:1.25;
+  color:var(--tinta);
+}
+.tira-item:hover .tira-nombre{color:var(--ciruela)}
+
+/* 8.2 Filtros — dos niveles, igual que el menú del header */
+.filtros-caja{margin-bottom:var(--e-6);padding-bottom:var(--e-5);border-bottom:1px solid var(--linea)}
+.filtros{display:flex;gap:var(--e-2);flex-wrap:wrap;align-items:center}
+.filtros-subs{margin-top:var(--e-3);padding-top:var(--e-3);border-top:1px dashed var(--linea)}
+.filtros-paso{font-size:var(--t-xs);color:var(--gris);font-weight:600;margin-right:var(--e-1)}
+.chip-cuenta{
+  display:inline-block;margin-left:var(--e-1);padding:0 6px;border-radius:var(--r-pill);
+  background:var(--papel-2);color:var(--gris);font-size:10px;font-weight:700;
+}
+.chip.activo .chip-cuenta{background:rgba(255,255,255,.18);color:var(--blanco)}
+.chip{
+  position:relative;isolation:isolate;overflow:hidden;
+  padding:var(--e-2) var(--e-4);border-radius:var(--r-pill);
+  font-size:var(--t-s);font-weight:500;
+  background:var(--blanco);color:var(--gris);border:1px solid var(--linea);
+  transition:transform var(--rapido) var(--sale);
+}
+.chip::after{
+  content:"";position:absolute;inset:0;z-index:-1;background:var(--tinta);
+  opacity:0;transition:opacity var(--rapido) var(--sale);
+}
+.chip:hover::after{opacity:.05}
+.chip:active{transform:scale(.97)}
+.chip.activo{background:var(--tinta);color:var(--blanco);border-color:var(--tinta)}
+
+.filtros-orden{margin-left:auto;display:flex;align-items:center;gap:var(--e-2);font-size:var(--t-s);color:var(--gris)}
+.filtros-orden select{
+  border:1px solid var(--linea);border-radius:var(--r-s);
+  padding:var(--e-2) var(--e-3);background:var(--blanco);color:var(--tinta);
+}
+
+.sin-resultados{
+  grid-column:1/-1;text-align:center;padding:var(--e-9) var(--e-5);
+  border:1px dashed var(--linea);border-radius:var(--r);
+}
+.sin-resultados h3{font-family:var(--display);font-size:var(--t-l);font-weight:600}
+.sin-resultados p{color:var(--gris);font-size:var(--t-s);margin-top:var(--e-2)}
+
+/* ------------------------------------------------------------
+   9. CARRITO
+   Entra desde el borde derecho, de donde se lo invocó.
+   ------------------------------------------------------------ */
+.fondo-oscuro{
+  position:fixed;inset:0;z-index:200;background:rgba(14,10,16,.55);
+  opacity:0;visibility:hidden;
+  transition:opacity var(--salida) var(--entra),visibility 0s linear var(--salida);
+}
+.fondo-oscuro.abierto{
+  opacity:1;visibility:visible;
+  transition:opacity var(--entrada) var(--sale),visibility 0s;
+}
+
+.panel-carrito{
+  position:fixed;top:0;right:0;z-index:210;height:100%;
+  width:420px;max-width:92vw;
+  background:var(--papel);display:flex;flex-direction:column;
+  transform:translate3d(100%,0,0);
+  transition:transform var(--salida) var(--entra);
+}
+.panel-carrito.abierto{
+  transform:translate3d(0,0,0);
+  transition:transform var(--entrada) var(--sale);
+}
+.panel-cabecera{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:var(--e-4) var(--e-5);background:var(--tinta);color:var(--blanco);
+}
+.panel-cabecera h3{
+  font-family:var(--display);font-size:var(--t-m);font-weight:600;
+  display:flex;align-items:center;gap:var(--e-2);
+}
+.panel-cabecera h3 svg{width:18px;height:18px}
+
+.btn-cerrar{
+  position:relative;isolation:isolate;overflow:hidden;
+  width:32px;height:32px;border-radius:var(--r-pill);
+  display:grid;place-items:center;color:currentColor;
+}
+.btn-cerrar::after{
+  content:"";position:absolute;inset:0;z-index:-1;background:currentColor;
+  opacity:0;transition:opacity var(--rapido) var(--sale);
+}
+.btn-cerrar:hover::after{opacity:.15}
+.btn-cerrar svg{width:18px;height:18px}
+
+.panel-items{flex:1;overflow-y:auto;padding:var(--e-4);display:flex;flex-direction:column;gap:var(--e-3)}
+.item-carrito{
+  display:flex;gap:var(--e-3);
+  background:var(--blanco);border:1px solid var(--linea);border-radius:var(--r);padding:var(--e-3);
+}
+.item-carrito img{width:56px;height:56px;object-fit:cover;border-radius:var(--r-s);flex:none}
+.item-info{flex:1;min-width:0}
+.item-info h4{font-size:var(--t-s);font-weight:600;line-height:1.35}
+.item-info .op{font-size:var(--t-xs);color:var(--gris)}
+.item-info .precio{font-size:var(--t-m);font-weight:700;margin-top:2px;letter-spacing:-.01em}
+.item-controles{display:flex;align-items:center;gap:var(--e-2);margin-top:var(--e-2)}
+.item-controles button{
+  width:26px;height:26px;border-radius:var(--r-pill);
+  border:1px solid var(--linea);background:var(--papel);
+  display:grid;place-items:center;font-weight:600;line-height:1;
+  transition:transform var(--rapido) var(--sale);
+}
+.item-controles button:active{transform:scale(.9)}
+.item-controles span{min-width:20px;text-align:center;font-weight:600;font-size:var(--t-s)}
+.item-quitar{
+  margin-left:auto;width:auto;border:0;background:none;border-radius:var(--r-s);
+  color:var(--gris);font-size:var(--t-xs);text-decoration:underline;
+}
+.item-quitar:hover{color:var(--vino)}
+
+.carrito-vacio{text-align:center;color:var(--gris);padding:var(--e-9) var(--e-4)}
+.carrito-vacio svg{width:48px;height:48px;stroke:var(--linea);margin:0 auto var(--e-4)}
+.carrito-vacio p{font-size:var(--t-s)}
+.carrito-vacio .titulo{font-family:var(--display);font-size:var(--t-m);color:var(--tinta);margin-bottom:var(--e-2)}
+
+.panel-pie{padding:var(--e-4) var(--e-5);background:var(--blanco);border-top:1px solid var(--linea)}
+.campo-retiro{margin-bottom:var(--e-4);padding-bottom:var(--e-4);border-bottom:1px solid var(--linea)}
+.campo-retiro select{
+  border:1px solid var(--linea);border-radius:var(--r-s);
+  padding:var(--e-3);background:var(--papel);color:var(--tinta);font-size:var(--t-s);
+  width:100%;cursor:pointer;
+}
+.campo-retiro small{font-size:var(--t-xs);color:var(--gris)}
+.fila-total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:var(--e-4)}
+.fila-total span{color:var(--gris);font-size:var(--t-s)}
+.fila-total strong{font-size:var(--t-xl);letter-spacing:-.02em}
+.btn-texto{
+  display:block;width:100%;margin-top:var(--e-2);padding:var(--e-2);
+  color:var(--gris);font-size:var(--t-xs);border-radius:var(--r-s);
+}
+.btn-texto:hover{color:var(--vino)}
+
+/* 9.2 Aviso */
+.aviso{
+  position:fixed;bottom:var(--e-5);left:50%;z-index:300;
+  display:flex;align-items:center;gap:var(--e-2);max-width:90vw;
+  padding:var(--e-3) var(--e-5);border-radius:var(--r-pill);
+  background:var(--tinta);color:var(--blanco);
+  font-size:var(--t-s);font-weight:500;
+  transform:translate3d(-50%,calc(100% + var(--e-5)),0);opacity:0;
+  transition:transform var(--salida) var(--entra),opacity var(--salida) var(--entra);
+}
+.aviso.visible{
+  transform:translate3d(-50%,0,0);opacity:1;
+  transition:transform var(--entrada) var(--sale),opacity var(--entrada) var(--sale);
+}
+.aviso svg{width:16px;height:16px;stroke:var(--oro);flex:none}
+
+/* ------------------------------------------------------------
+   10. MODAL DE USUARIO
+   ------------------------------------------------------------ */
+.modal{
+  position:fixed;inset:0;z-index:220;display:grid;place-items:center;padding:var(--e-4);
+  opacity:0;visibility:hidden;
+  transition:opacity var(--salida) var(--entra),visibility 0s linear var(--salida);
+}
+.modal.abierto{
+  opacity:1;visibility:visible;
+  transition:opacity var(--entrada) var(--sale),visibility 0s;
+}
+.modal-caja{
+  position:relative;z-index:2;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;
+  background:var(--papel);border-radius:var(--r-l);
+  box-shadow:var(--sombra-alta);
+  transform:scale(.97);
+  transition:transform var(--salida) var(--entra);
+}
+.modal.abierto .modal-caja{
+  transform:scale(1);
+  transition:transform var(--entrada) var(--sale);
+}
+.modal-cabecera{
+  position:relative;padding:var(--e-6) var(--e-5) var(--e-5);
+  background:var(--tinta);color:var(--blanco);text-align:center;
+}
+.modal-cabecera h3{font-family:var(--display);font-size:var(--t-l);font-weight:600;letter-spacing:-.015em}
+.modal-cabecera p{font-size:var(--t-xs);color:var(--gris-oscuro);margin-top:var(--e-1)}
+.modal-cabecera .btn-cerrar{position:absolute;top:var(--e-3);right:var(--e-3)}
+
+.pestanas{display:flex;background:var(--blanco);border-bottom:1px solid var(--linea)}
+.pestanas button{
+  position:relative;flex:1;padding:var(--e-3);
+  font-size:var(--t-s);font-weight:600;color:var(--gris);
+}
+.pestanas button::after{
+  content:"";position:absolute;left:var(--e-5);right:var(--e-5);bottom:0;height:2px;
+  background:var(--oro);transform:scaleX(0);
+  transition:transform var(--rapido) var(--sale);
+}
+.pestanas button.activo{color:var(--tinta)}
+.pestanas button.activo::after{transform:scaleX(1)}
+
+.formulario{padding:var(--e-5);display:flex;flex-direction:column;gap:var(--e-4)}
+.campo{display:flex;flex-direction:column;gap:var(--e-1)}
+.campo label{font-size:var(--t-xs);font-weight:600;letter-spacing:.01em}
+.campo input,.campo textarea,.campo select{
+  border:1px solid var(--linea);border-radius:var(--r-s);
+  padding:var(--e-3);background:var(--blanco);color:var(--tinta);font-size:var(--t-s);
+}
+.campo input::placeholder,.campo textarea::placeholder{color:var(--gris);opacity:.7}
+.campo textarea{resize:vertical;min-height:96px}
+.campo-error{color:var(--vino);font-size:var(--t-xs);display:none}
+.campo.con-error input,.campo.con-error textarea{border-color:var(--vino)}
+.campo.con-error .campo-error{display:block}
+
+.mensaje-form{display:none;font-size:var(--t-s);padding:var(--e-3);border-radius:var(--r-s)}
+.mensaje-form.ok{display:block;background:#EAF3EC;color:#1E5128;border:1px solid #CADDCE}
+.mensaje-form.mal{display:block;background:#FBECEE;color:var(--vino);border:1px solid #F0D4D8}
+.nota-form{font-size:var(--t-xs);color:var(--gris);text-align:center}
+
+.panel-sesion{padding:var(--e-5);display:flex;flex-direction:column;gap:var(--e-4);text-align:center}
+.avatar{
+  width:64px;height:64px;margin:0 auto;border-radius:var(--r-pill);
+  background:var(--ciruela);color:var(--oro);
+  display:grid;place-items:center;
+  font-family:var(--display);font-size:var(--t-l);font-weight:600;
+}
+.panel-sesion .nombre{font-family:var(--display);font-size:var(--t-m);font-weight:600}
+.panel-sesion .dato{font-size:var(--t-s);color:var(--gris)}
+
+/* ------------------------------------------------------------
+   11. PÁGINAS INTERNAS
+   ------------------------------------------------------------ */
+.encabezado-pagina{background:var(--tinta);color:var(--blanco);padding-top:var(--e-8);padding-bottom:var(--e-8)}
+.encabezado-pagina h1{
+  font-family:var(--display);font-weight:600;
+  font-size:var(--t-2xl);line-height:1.05;letter-spacing:-.025em;max-width:16ch;
+}
+.encabezado-pagina p{color:var(--gris-oscuro);font-size:var(--t-s);margin-top:var(--e-3);max-width:62ch}
+.migas{font-size:var(--t-xs);color:var(--gris-oscuro);margin-bottom:var(--e-3)}
+.migas a:hover{color:var(--oro)}
+
+/* 11.2 Sucursales */
+.grilla-sucursales{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:var(--e-5)}
+.tarjeta-sucursal{
+  position:relative;background:var(--blanco);border:1px solid var(--linea);
+  border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;
+  transition:transform var(--rapido) var(--sale);
+}
+.tarjeta-sucursal::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:var(--sombra-alta);opacity:0;transition:opacity var(--rapido) var(--sale);
+}
+.tarjeta-sucursal:hover{transform:translateY(-2px)}
+.tarjeta-sucursal:hover::after{opacity:1}
+/* La foto es el marco de las chapas de estado, por eso relative */
+.tarjeta-sucursal .foto{position:relative;aspect-ratio:16/10;background:var(--papel-2)}
+.tarjeta-sucursal .foto img{width:100%;height:100%;object-fit:cover}
+/* Las fotos son del local, con luces y encuadres distintos. Un velo
+   oscuro abajo empareja las dos y hace legible cualquier chapa que
+   caiga encima, sin pisar la foto entera. */
+.tarjeta-sucursal .foto::after{
+  content:"";position:absolute;inset:auto 0 0;height:45%;
+  background:linear-gradient(to top,rgba(14,10,16,.55),transparent);
+  pointer-events:none;
+}
+.tarjeta-sucursal .estado,
+.tarjeta-sucursal .chapa-elegida{
+  position:absolute;z-index:2;top:var(--e-3);
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:999px;
+  font-size:var(--t-xs);font-weight:600;letter-spacing:.01em;
+  background:rgba(255,255,255,.94);
+}
+.tarjeta-sucursal .estado{left:var(--e-3)}
+.tarjeta-sucursal .chapa-elegida{right:var(--e-3);background:var(--ciruela);color:var(--blanco)}
+.tarjeta-sucursal .chapa-elegida svg{width:14px;height:14px}
+
+.tarjeta-sucursal .cuerpo{
+  padding:var(--e-4) var(--e-4) var(--e-4);
+  display:flex;flex-direction:column;gap:var(--e-3);flex:1;
+}
+.datos-sucursal{display:flex;flex-direction:column;gap:var(--e-2)}
+/* Las acciones se empujan al pie: con las dos tarjetas alineadas
+   abajo, la fila se lee de una aunque una dirección ocupe dos
+   renglones y la otra uno. */
+.acciones-sucursal{
+  margin-top:auto;padding-top:var(--e-4);border-top:1px solid var(--linea);
+  display:flex;flex-wrap:wrap;gap:var(--e-2);align-items:center;
+}
+.acciones-sucursal .btn{flex:1 1 auto;justify-content:center}
+.acciones-sucursal .btn svg{width:15px;height:15px}
+.dato-sucursal a{color:inherit}
+.dato-sucursal a:hover{color:var(--ciruela)}
+.tarjeta-sucursal h3{font-family:var(--display);font-size:var(--t-l);font-weight:600;letter-spacing:-.015em}
+.dato-sucursal{display:flex;align-items:flex-start;gap:var(--e-2);font-size:var(--t-s);color:var(--gris)}
+.dato-sucursal svg{width:16px;height:16px;stroke:var(--ciruela);flex:none;margin-top:4px}
+.estado{
+  align-self:flex-start;display:flex;align-items:center;gap:var(--e-2);
+  font-size:var(--t-xs);font-weight:600;
+}
+.estado::before{content:"";width:6px;height:6px;border-radius:var(--r-pill);background:currentColor}
+.estado.abierto{color:#1E5128}
+.estado.cerrado{color:var(--vino)}
+
+/* Sucursal elegida para retirar */
+.tarjeta-sucursal.elegida{border-color:var(--ciruela);box-shadow:0 0 0 1px var(--ciruela)}
+.marca-elegida{
+  flex:1 1 auto;display:inline-flex;align-items:center;gap:var(--e-2);
+  font-size:var(--t-s);font-weight:600;color:var(--ciruela);
+}
+.marca-elegida svg{width:16px;height:16px;flex:none}
+
+/* 11.2b Galería del local */
+.galeria-local{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--e-4)}
+.foto-local{
+  position:relative;border-radius:var(--r);overflow:hidden;
+  border:1px solid var(--linea);background:var(--papel-2);
+}
+.foto-local img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.foto-local figcaption{
+  padding:var(--e-3) var(--e-4);font-size:var(--t-xs);color:var(--gris);background:var(--blanco);
+}
+
+/* 11.3 Pasos */
+/* Los cuatro pasos son una secuencia, no cuatro textos sueltos:
+   el ícono los ancla y la línea punteada los encadena, así se lee
+   que hay un orden y no cuatro columnas de información. */
+.pasos{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:var(--e-5)}
+/* Una sola línea de punta a punta por detrás, del centro del primer
+   círculo al del último. Un guion por hueco quedaba tan corto que no
+   se leía como que los pasos van encadenados. Los círculos son
+   blancos y opacos, así que la tapan a su paso. */
+.pasos::before{
+  content:"";position:absolute;z-index:0;top:29px;
+  left:29px;right:calc((100% - var(--e-5) * 3) / 4 - 29px);
+  border-top:1px dashed var(--linea);
+}
+/* El link al pie de cada paso, para que queden todos a la misma
+   altura aunque un texto sea más largo que otro */
+.paso{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start}
+.paso-link{margin-top:auto}
+.paso-marca{position:relative;width:58px;height:58px;margin-bottom:var(--e-4)}
+.paso-icono{
+  width:58px;height:58px;border-radius:50%;display:grid;place-items:center;
+  background:var(--blanco);border:1px solid var(--linea);color:var(--ciruela);
+  transition:transform var(--rapido) var(--sale);
+}
+.paso-icono svg{width:25px;height:25px}
+.paso-numero{
+  position:absolute;top:-4px;right:-4px;
+  width:24px;height:24px;border-radius:50%;display:grid;place-items:center;
+  background:var(--ciruela);color:var(--blanco);
+  font-family:var(--display);font-size:12px;font-weight:700;line-height:1;
+}
+.paso h3{font-size:var(--t-m);font-weight:600;margin-bottom:var(--e-2)}
+.paso p{font-size:var(--t-s);color:var(--gris);max-width:40ch}
+.paso-link{
+  display:inline-flex;align-items:center;gap:var(--e-2);padding-top:var(--e-4);
+  font-size:var(--t-s);font-weight:600;color:var(--ciruela);
+}
+.paso-link svg{width:15px;height:15px;transition:transform var(--rapido) var(--sale)}
+.paso-link:hover svg{transform:translate3d(3px,0,0)}
+.paso:hover .paso-icono{transform:translateY(-2px)}
+
+/* Formas de pago */
+.caja-pagos{display:flex;gap:var(--e-5);align-items:flex-start}
+.pagos-titulo{
+  flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;
+  background:var(--papel-2);color:var(--ciruela);
+}
+.pagos-titulo svg{width:23px;height:23px}
+.caja-pagos h2{font-family:var(--display);font-size:var(--t-l);letter-spacing:-.01em}
+.caja-pagos > div > p{font-size:var(--t-s);color:var(--gris);margin-top:var(--e-2)}
+.pastillas{display:flex;flex-wrap:wrap;gap:var(--e-2);margin-top:var(--e-4)}
+.pastillas li{
+  padding:6px 14px;border-radius:999px;border:1px solid var(--linea);
+  background:var(--papel-2);font-size:var(--t-s);font-weight:600;
+}
+.pagos-nota{margin-top:var(--e-4);font-size:var(--t-xs) !important}
+
+/* Cierre */
+.centrado .seccion-bajada{margin-left:auto;margin-right:auto}
+.cierre-acciones{display:flex;flex-wrap:wrap;gap:var(--e-3);justify-content:center;margin-top:var(--e-5)}
+.btn-linea-claro{
+  border:1px solid rgba(255,255,255,.3);color:var(--blanco);
+}
+.btn-linea-claro:hover{border-color:var(--oro);color:var(--oro)}
+
+.pasos-oscuro .paso-numero{background:var(--oro);color:var(--tinta)}
+.pasos-oscuro .paso-icono{background:transparent;border-color:rgba(255,255,255,.2);color:var(--oro)}
+.pasos-oscuro p{color:var(--gris-oscuro)}
+
+/* 11.4 Acordeón */
+.acordeon{border-top:1px solid var(--linea)}
+.acordeon-item{border-bottom:1px solid var(--linea)}
+.acordeon-boton{
+  width:100%;text-align:left;padding:var(--e-4) 0;
+  display:flex;align-items:center;justify-content:space-between;gap:var(--e-4);
+  font-size:var(--t-m);font-weight:600;
+}
+.acordeon-boton .mas{
+  flex:none;width:20px;height:20px;position:relative;
+  transition:transform var(--rapido) var(--sale);
+}
+.acordeon-boton .mas::before,
+.acordeon-boton .mas::after{
+  content:"";position:absolute;top:50%;left:50%;width:12px;height:1.5px;
+  background:var(--tinta);transform:translate(-50%,-50%);
+}
+.acordeon-boton .mas::after{transform:translate(-50%,-50%) rotate(90deg)}
+.acordeon-item.abierto .acordeon-boton .mas{transform:rotate(45deg)}
+.acordeon-cuerpo{display:none;padding-bottom:var(--e-4);font-size:var(--t-s);color:var(--gris);max-width:70ch}
+.acordeon-item.abierto .acordeon-cuerpo{display:block}
+
+/* 11.5 Contacto */
+.contacto-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:var(--e-6);align-items:start}
+.caja{background:var(--blanco);border:1px solid var(--linea);border-radius:var(--r);padding:var(--e-5)}
+.caja h2{font-family:var(--display);font-size:var(--t-l);font-weight:600;letter-spacing:-.015em;margin-bottom:var(--e-4)}
+.caja p{font-size:var(--t-s);color:var(--gris);max-width:62ch}
+.lista-contacto{display:flex;flex-direction:column;gap:var(--e-4)}
+.lista-contacto li{display:flex;gap:var(--e-3);align-items:flex-start}
+.lista-contacto svg{width:18px;height:18px;stroke:var(--ciruela);flex:none;margin-top:4px}
+.lista-contacto strong{display:block;font-size:var(--t-s);font-weight:600}
+.lista-contacto span{font-size:var(--t-s);color:var(--gris)}
+
+/* ------------------------------------------------------------
+   12. FOOTER
+   ------------------------------------------------------------ */
+.footer{background:var(--tinta);color:var(--gris-oscuro);margin-top:var(--e-8)}
+.footer-top{
+  /* La marca ocupa poco: si le doy la columna más ancha queda un
+     hueco en el medio. Las tres parejas, con la de sucursales algo
+     más grande porque es la que lleva más texto. */
+  display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:var(--e-6);
+  padding-top:var(--e-7);padding-bottom:var(--e-6);
+}
+
+/* Las sucursales van una al lado de la otra cuando hay ancho: en una
+   sola fila el pie mide bastante menos y las tres columnas quedan
+   parejas. auto-fit es para que siga funcionando si mañana se suma
+   una tercera sucursal. */
+.footer-sucursales{display:grid;gap:var(--e-4)}
+/* auto-fit se protege solo: si la columna no da para dos, vuelven a
+   apilarse sin necesidad de otro breakpoint. */
+@media (min-width:761px){
+  .footer-sucursales{grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:var(--e-5)}
+}
+/* 1001px es donde el pie pasa a tres columnas (abajo hay un
+   max-width:1000px que lo baja a dos): a partir de ahí la del medio
+   necesita el ancho extra para llevar las dos sucursales en fila. */
+@media (min-width:1001px){
+  .footer-top{grid-template-columns:1fr 1.9fr 1fr}
+}
+.footer h4{
+  color:var(--blanco);font-size:var(--t-xs);font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:var(--e-4);
+}
+.footer p,.footer a,.footer li{font-size:var(--t-s)}
+.footer-marca p{margin-top:var(--e-4);max-width:36ch}
+.footer-enlaces li{margin-bottom:var(--e-3)}
+.footer-enlaces a:hover{color:var(--blanco)}
+.footer-dato{display:flex;gap:var(--e-3);align-items:flex-start;margin-bottom:var(--e-3)}
+.footer-dato svg{width:16px;height:16px;stroke:var(--oro);flex:none;margin-top:4px}
+/* El horario cuelga de su sucursal: va corrido y más apagado para
+   que se lea como parte del dato de arriba y no como otro renglón. */
+/* El horario cuelga de su dirección, más chico y apagado */
+.footer-horario{font-size:var(--t-xs);opacity:.75}
+.footer-dato a{color:inherit}
+.footer-dato a:hover{color:var(--oro)}
+
+
+.footer-mas{font-weight:600;color:var(--oro)}
+
+.redes{display:flex;gap:var(--e-2);margin-top:var(--e-4)}
+.redes a{
+  position:relative;isolation:isolate;overflow:hidden;
+  width:36px;height:36px;border-radius:var(--r-pill);
+  background:rgba(255,255,255,.07);display:grid;place-items:center;
+  transition:transform var(--rapido) var(--sale);
+}
+.redes a::after{
+  content:"";position:absolute;inset:0;z-index:-1;background:var(--oro);
+  opacity:0;transition:opacity var(--rapido) var(--sale);
+}
+.redes a:hover{transform:translateY(-2px)}
+.redes a:hover::after{opacity:1}
+.redes a:hover{color:var(--tinta)}
+.redes svg{width:17px;height:17px}
+
+.footer-boletin{display:flex;gap:var(--e-2);margin-top:var(--e-3)}
+.footer-boletin input{
+  flex:1;min-width:0;border:1px solid rgba(255,255,255,.2);border-radius:var(--r-pill);
+  padding:var(--e-3) var(--e-4);font-size:var(--t-s);
+  background:rgba(255,255,255,.06);color:var(--blanco);
+}
+.footer-boletin input::placeholder{color:var(--gris-oscuro)}
+
+.footer-abajo{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  gap:var(--e-3) var(--e-5);padding-top:var(--e-4);padding-bottom:var(--e-4);
+  border-top:1px solid rgba(255,255,255,.12);
+  font-size:var(--t-xs);opacity:.75;
+}
+.footer-legales{display:flex;flex-wrap:wrap;gap:var(--e-2) var(--e-4)}
+/* Sin subrayado: cuatro enlaces subrayados seguidos pesan más que
+   el copyright, y son lo menos importante del pie. */
+.footer-legales a{opacity:.9;text-decoration:none}
+.footer-legales a:hover{opacity:1;color:var(--oro);text-decoration:underline}
+/* Solo el crédito lleva subrayado: los legales son cuatro seguidos
+   y subrayados pesaban más que el copyright, siendo lo que menos se
+   consulta del pie. */
+.footer-abajo a{text-decoration:none}
+.footer-abajo > span a{text-decoration:underline}
+.footer-abajo a:hover{color:var(--blanco)}
+
+/* 12.2 WhatsApp flotante */
+.wsp-flotante{
+  position:fixed;bottom:var(--e-5);right:var(--e-5);z-index:150;
+  width:52px;height:52px;border-radius:var(--r-pill);
+  background:#1FA855;color:#fff;display:grid;place-items:center;
+  box-shadow:var(--sombra-alta);
+  transition:transform var(--rapido) var(--sale);
+}
+.wsp-flotante:hover{transform:scale(1.06)}
+.wsp-flotante:active{transform:scale(.96)}
+.wsp-flotante svg{width:28px;height:28px}
+/* El color del botón depende de qué archivo haya: el logo de Meta
+   viene en verde o en blanco, y no se le puede cambiar el color. Así
+   que el que cambia es el círculo de atrás, no el logo.
+   con-logo se agrega recién cuando la imagen cargó: si falta el
+   archivo, el botón se queda verde con el globito y anda igual. */
+.wsp-flotante img{width:100%;height:100%;border-radius:inherit;display:block}
+.wsp-flotante.con-logo.estilo-blanco{background:#fff}
+.wsp-flotante.con-logo.estilo-verde{background:#25D366}
+.wsp-flotante.con-logo.estilo-ninguno{background:transparent}
+/* El logo suelto llena su lienzo de punta a punta: sin este respiro
+   toca el borde del círculo y se ve apretado. El ícono completo no
+   lo necesita porque ya trae su propio margen. */
+.wsp-flotante.con-logo.estilo-blanco img,
+.wsp-flotante.con-logo.estilo-verde img{width:64%;height:64%}
+
+/* ------------------------------------------------------------
+   13. RESPONSIVE
+   ------------------------------------------------------------ */
+@media (max-width:1000px){
+  .ofertas-portada{grid-template-columns:1fr}
+  .ofertas-laterales{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+  .cinta-fila{grid-template-columns:1fr 1fr;gap:var(--e-4)}
+  .contacto-grid{grid-template-columns:1fr}
+  .pasos{grid-template-columns:1fr;gap:var(--e-6)}
+  /* Apilados, la línea que los une va en vertical, de hueco en hueco */
+  .pasos::before{display:none}
+  .paso + .paso::after{
+    content:"";position:absolute;top:calc(-1 * var(--e-6));left:29px;
+    height:var(--e-6);border-left:1px dashed var(--linea);
+  }
+  .paso-link{margin-top:0}
+  .caja-pagos{flex-direction:column;gap:var(--e-4)}
+
+  .footer-top{grid-template-columns:1fr 1fr}
+  .footer-marca{grid-column:1 / -1}
+
+}
+
+@media (max-width:760px){
+  .contenedor{padding-left:var(--e-4);padding-right:var(--e-4)}
+  .seccion{padding-top:var(--e-7);padding-bottom:var(--e-7)}
+
+  /* Header: logo y acciones arriba, buscador en su propia línea */
+  .header-grid{
+    grid-template-columns:auto 1fr auto;
+    grid-template-areas:"logo . acciones" "buscador buscador buscador";
+    gap:var(--e-3);
+  }
+  .logo{grid-area:logo}
+  .header-acciones{grid-area:acciones}
+  .buscador{grid-area:buscador;max-width:none}
+  .logo img{height:46px}
+  .accion-texto{display:none}
+  .btn-menu{display:grid}
+
+  /* Barra superior: un solo renglón */
+  .barra-superior{font-size:11px}
+  .barra-superior .contenedor{justify-content:center;min-height:32px}
+  .barra-superior-der{display:none}
+  .barra-superior-izq .barra-dato:not(:nth-child(2)){display:none}
+
+  /* Secciones: menú desplegable */
+  .barra-secciones .contenedor{
+    display:grid;grid-template-rows:0fr;
+    /* stretch, no center: con center el ítem se desborda de la fila
+       de 0px y tapa el header */
+    align-items:stretch;
+    /* stretch, no center: con center el ítem se desborda hacia
+       arriba y abajo de la fila de 0px y tapa el header */
+    align-items:stretch;
+    padding-left:0;padding-right:0;
+    transition:grid-template-rows var(--entrada) var(--sale);
+  }
+  .barra-secciones.abierto .contenedor{grid-template-rows:1fr}
+  /* min-height:0 es lo que permite que la fila de 0fr realmente
+     recorte el contenido; sin eso el menú cerrado sigue ocupando
+     lugar y tapa los botones del header */
+  .barra-secciones-lista{overflow:hidden;min-height:0;display:flex;flex-direction:column;align-items:stretch}
+  /* El panel se mete justo debajo del botón que lo abre */
+  .barra-secciones-lista > .abre-menu{order:0}
+  .megamenu{order:1}
+  .barra-secciones-lista > a{order:2}
+
+  /* Menú guiado en celular: un nivel por vez, con flecha de vuelta */
+  .megamenu{
+    position:static;background:var(--papel);box-shadow:none;
+    transform:none;opacity:1;transition:none;
+  }
+  .megamenu-caja{display:block;padding:0}
+  .mm-nivel{display:none;padding:var(--e-4)}
+  .mm-nivel + .mm-nivel{border-left:0;padding-left:var(--e-4)}
+  .megamenu[data-nivel="1"] .mm-cats,
+  .megamenu[data-nivel="2"] .mm-subs,
+  .megamenu[data-nivel="3"] .mm-prods{display:block;animation:entraNivel 200ms var(--sale)}
+  .mm-volver{
+    display:flex;align-items:center;gap:var(--e-2);padding:var(--e-2) 0;margin-bottom:var(--e-2);
+    font-size:var(--t-s);font-weight:600;color:var(--ciruela);
+  }
+  .mm-volver svg{width:16px;height:16px}
+  /* En celular desplaza la página, no cada columna */
+  .mm-lista{max-height:none;overflow:visible}
+  .mm-opcion{padding:var(--e-3)}
+  .mm-flecha{opacity:1;transform:none}
+  .galeria-local{grid-template-columns:1fr}
+  .barra-secciones-lista > :is(a,.abre-menu){
+    padding:var(--e-4);border-bottom:1px solid rgba(255,255,255,.12);
+  }
+  .barra-secciones-lista > :is(a,.abre-menu)::after{left:0;right:auto;top:0;bottom:0;width:3px;height:auto;
+    transform:scaleY(0);transform-origin:top}
+  .barra-secciones-lista > :is(a,.abre-menu).activo::after,
+  .barra-secciones-lista > :is(a,.abre-menu):hover::after{transform:scaleY(1)}
+
+  /* Portada */
+
+  .banner-capa{padding:var(--e-6) var(--e-4) var(--e-4)}
+  .banner-titulo{font-size:var(--t-xl);max-width:none}
+  .ofertas-laterales{grid-template-columns:1fr}
+  .tarjeta-oferta{min-height:170px}
+  .cinta-fila{grid-template-columns:1fr;gap:var(--e-4)}
+
+  /* Catálogo */
+  .grilla-productos{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--e-3)}
+  .carrusel-pista .tarjeta-producto{width:180px;flex:0 0 180px}
+  .cinta-manual-pista .tarjeta-producto{width:180px;flex:0 0 180px}
+  /* Pegadas al borde: con -14px se salían de la pantalla */
+  .cinta-flecha{width:36px;height:36px}
+  .cinta-flecha.izq{left:-6px}
+  .cinta-flecha.der{right:-6px}
+  .grilla-categorias{grid-template-columns:1fr 1fr;gap:var(--e-3)}
+  .producto-cuerpo{padding:var(--e-3)}
+  .filtros-orden{margin-left:0;width:100%}
+  .filtros-orden select{flex:1}
+
+  .panel-carrito{width:100%;max-width:none}
+
+  /* Footer */
+  .footer-top{grid-template-columns:1fr;gap:var(--e-6);padding-top:var(--e-7)}
+  .footer-enlaces ul{display:grid;grid-template-columns:1fr 1fr;gap:0 var(--e-4)}
+  .footer-marca p{max-width:none}
+  .footer-abajo{flex-direction:column;align-items:flex-start}
+  .wsp-flotante{width:46px;height:46px;bottom:var(--e-4);right:var(--e-4)}
+  .wsp-flotante svg{width:22px;height:22px}
+}
+
+@keyframes entraNivel{
+  from{opacity:0;transform:translate3d(14px,0,0)}
+  to{opacity:1;transform:none}
+}
+
+@media (max-width:400px){
+  .logo-texto{display:none}
+  .grilla-productos{grid-template-columns:1fr 1fr}
+}
+
+/* ------------------------------------------------------------
+   14. MENOS MOVIMIENTO
+   No se "hace más lento": se saca el desplazamiento y queda
+   sólo el fundido.
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+
+  .carrusel-pista{animation:none;width:100%}
+  .carrusel{overflow-x:auto;-webkit-mask-image:none;mask-image:none}
+
+  *,*::before,*::after{
+    transition-duration:1ms !important;
+    animation-duration:1ms !important;
+    animation-iteration-count:1 !important;
+  }
+
+  /* Lo único que se mantiene es la aparición por opacity */
+  .banner-slide,.banner-slide.activo,
+  .modal,.modal.abierto,
+  .megamenu,.megamenu.abierto,
+  .fondo-oscuro,.fondo-oscuro.abierto{
+    transition-duration:150ms !important;
+    transition-property:opacity,visibility !important;
+  }
+  .modal-caja,.modal.abierto .modal-caja,
+  .megamenu,.megamenu.abierto{transform:none !important}
+  .panel-carrito{transition-duration:1ms !important}
+  .aviso,.aviso.visible{transition-property:opacity !important;transition-duration:150ms !important}
+  .tarjeta-producto:hover,.tarjeta-categoria:hover,
+  .tarjeta-oferta:hover,.tarjeta-sucursal:hover,
+  .cinta-manual-pista{scroll-behavior:auto}
+  .cinta-flecha:hover,.cinta-flecha:active,
+  .redes a:hover,.wsp-flotante:hover,
+  .tira-item:hover .tira-ico,
+  .tarjeta-categoria:hover .cat-figura svg,
+  .tarjeta-categoria:hover .cat-figura img{transform:none}
+}

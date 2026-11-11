@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cómo pedir — Fiambrería 4 Quesos</title>
+  <meta name="description" content="Pasos para hacer tu pedido online en 4 Quesos: armás el carrito, confirmás por WhatsApp y lo retirás por el local.">
+  <meta name="theme-color" content="#1A1625">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+ 
+<body data-pagina="como-pedir">
+ 
+  <header id="sitio-header"></header>
+ 
+  <main>
+    <section class="encabezado-pagina">
+      <div class="contenedor">
+        <div class="migas"><a href="../index.html">Inicio</a> › Cómo pedir</div>
+        <h1>Cómo pedir</h1>
+        <p>No hace falta registrarse para pedir, pero si creás tu cuenta guardamos tus datos y el próximo pedido te sale en dos toques.</p>
+      </div>
+    </section>
+ 
+    <section class="seccion">
+      <div class="contenedor">
+        <!-- Los pasos se arman desde JS para usar los mismos íconos
+             que el header y no tener un segundo juego de dibujos. -->
+        <div id="pasos-pedido"></div>
+
+        <div class="caja caja-pagos mt-6">
+          <div class="pagos-titulo" id="pagos-icono"></div>
+          <div>
+            <h2>Formas de pago</h2>
+            <p>Se paga al retirar, con lo que te quede más cómodo.</p>
+            <ul class="pastillas">
+              <li>Efectivo</li><li>Débito</li><li>Crédito</li>
+              <li>Transferencia</li><li>QR</li>
+            </ul>
+            <p class="pagos-nota">También tomamos tarjetas en cuotas, según las promociones bancarias vigentes.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+ 
+    <section class="seccion seccion-alterna sin-tope">
+      <div class="contenedor">
+        <div class="seccion-encabezado">
+          <div>
+            <h2 class="seccion-titulo">Preguntas frecuentes</h2>
+            <div class="linea-dorada"></div>
+          </div>
+        </div>
+ 
+        <div class="acordeon" id="faq">
+          <div class="acordeon-item abierto" id="faq-envios">
+            <button class="acordeon-boton">¿Hacen envíos a domicilio? <span class="mas" aria-hidden="true"></span></button>
+            <div class="acordeon-cuerpo">
+              No. Por ahora trabajamos solamente con retiro por el local: no tenemos
+              servicio de reparto. Hacés el pedido, lo dejamos preparado y lo pasás
+              a buscar por la sucursal que elijas.
+            </div>
+          </div>
+          <div class="acordeon-item" id="faq-pagos">
+            <button class="acordeon-boton">¿Qué medios de pago aceptan? <span class="mas" aria-hidden="true"></span></button>
+            <div class="acordeon-cuerpo">
+              Efectivo, débito, crédito, transferencia y QR, todo al momento de retirar. También
+              tomamos tarjetas en cuotas según las promociones bancarias vigentes.
+            </div>
+          </div>
+          <div class="acordeon-item" id="faq-corte">
+            <button class="acordeon-boton">¿Puedo pedir el fiambre cortado de una forma especial? <span class="mas" aria-hidden="true"></span></button>
+            <div class="acordeon-cuerpo">
+              Sí. Cuando confirmás el pedido por WhatsApp avisanos si lo querés finito, grueso o en taco,
+              y si va separado por hojas de papel.
+            </div>
+          </div>
+          <div class="acordeon-item" id="faq-picadas">
+            <button class="acordeon-boton">¿Las picadas se encargan con anticipación? <span class="mas" aria-hidden="true"></span></button>
+            <div class="acordeon-cuerpo">
+              Las picadas para 2 y para 4 salen en el día. Las tablas grandes o para eventos conviene
+              encargarlas con 24 horas de anticipación.
+            </div>
+          </div>
+          <div class="acordeon-item" id="faq-registro">
+            <button class="acordeon-boton">¿Es obligatorio registrarse? <span class="mas" aria-hidden="true"></span></button>
+            <div class="acordeon-cuerpo">
+              No. El registro sirve para guardar tu nombre y teléfono y que no tengas que escribirlos
+              en cada pedido. Podés comprar igual sin cuenta.
+            </div>
+          </div>
+        </div>
+ 
+      </div>
+    </section>
+
+    <!-- ====== CIERRE ====== -->
+    <section class="seccion seccion-oscura">
+      <div class="contenedor centrado">
+        <h2 class="seccion-titulo">¿Arrancamos?</h2>
+        <p class="seccion-bajada">Armá el pedido cuando quieras: te confirmamos por WhatsApp y lo dejamos listo.</p>
+        <div class="cierre-acciones">
+          <a class="btn btn-oro" href="../productos/productos.html">Ver el catálogo</a>
+          <a class="btn btn-linea-claro" data-wsp href="#">
+            Escribirnos por WhatsApp
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+ 
+  <footer id="sitio-footer"></footer>
+ 
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/carrito.js"></script>
+  <script src="../assets/js/usuarios.js"></script>
+  <script src="../assets/js/header.js"></script>
+  <script src="../assets/js/ofertas.js"></script>
+  <script src="../assets/js/catalogo.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const i = FB.ico;
+
+      /* Cada paso con su ícono y, donde tiene sentido, el link para
+         hacerlo. Una guía que te dice "buscá en el catálogo" y no te
+         deja ir al catálogo obliga a volver al menú. */
+      document.getElementById('pasos-pedido').innerHTML = [
+        [i.grilla, 'Elegí los productos',
+         'Buscá desde el catálogo o con el buscador de arriba. En cada producto elegís la presentación: 100 g, media barra o kilo en fiambres y quesos; por unidad, 2 o 6 en el resto.',
+         '../productos/productos.html', 'Ver el catálogo'],
+        [i.carrito, 'Revisá tu carrito',
+         'Tocá “Mi pedido” arriba a la derecha. Ahí sumás, restás o sacás productos y ves el total actualizado.', '', ''],
+        [i.wsp, 'Confirmá por WhatsApp',
+         'Con el botón del carrito se arma solo el mensaje con todo el detalle. Te confirmamos el stock y a qué hora lo pasás a buscar.', '', ''],
+        [i.caja, 'Retiralo por el local',
+         'Pasá por la sucursal que elegiste en el horario acordado. Se paga en el momento de retirar.',
+         '../sucursales/sucursales.html', 'Ver las sucursales']
+      ].map(([ico, titulo, texto, href, link], n) => `
+        <div class="paso">
+          <div class="paso-marca">
+            <span class="paso-icono">${ico}</span>
+            <span class="paso-numero">${n + 1}</span>
+          </div>
+          <h3>${titulo}</h3>
+          <p>${texto}</p>
+          ${href ? `<a class="paso-link" href="${href}">${link} ${i.flecha}</a>` : ''}
+        </div>`).join('');
+      document.getElementById('pasos-pedido').className = 'pasos';
+
+      document.getElementById('pagos-icono').innerHTML = i.tarjeta;
+
+      FB.catalogo.acordeon('#faq');
+    });
+  </script>
+</body>
+</html>

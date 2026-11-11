@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Categorías — Fiambrería 4 Quesos</title>
+  <meta name="description" content="Fiambres, quesos, picadas, lácteos, almacén, panificados, bebidas y congelados.">
+  <meta name="theme-color" content="#1A1625">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+
+<body data-pagina="categorias">
+
+  <header id="sitio-header"></header>
+
+  <main>
+    <section class="encabezado-pagina">
+      <div class="contenedor">
+        <div class="migas"><a href="../index.html">Inicio</a> › Categorías</div>
+        <h1>Categorías</h1>
+        <p>Todo lo que hay en el mostrador, ordenado por rubro. Tocá una categoría y vas directo a esos productos.</p>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="contenedor">
+        <div id="grilla-categorias"></div>
+      </div>
+    </section>
+
+    <section class="seccion seccion-alterna sin-tope">
+      <div class="contenedor">
+        <div class="seccion-encabezado">
+          <div>
+            <h2 class="seccion-titulo">Destacados de cada rubro</h2>
+            <p class="seccion-bajada">Una muestra de lo que vas a encontrar</p>
+            <div class="linea-dorada"></div>
+          </div>
+        </div>
+        <div id="grilla-muestra"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="sitio-footer"></footer>
+
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/carrito.js"></script>
+  <script src="../assets/js/usuarios.js"></script>
+  <script src="../assets/js/header.js"></script>
+  <script src="../assets/js/ofertas.js"></script>
+  <script src="../assets/js/catalogo.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      FB.catalogo.categorias('grilla-categorias');
+      FB.catalogo.grilla('grilla-muestra', FB.destacados().slice(0, 8));
+    });
+  </script>
+</body>
+</html>

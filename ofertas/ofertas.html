@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ofertas — Fiambrería 4 Quesos</title>
+  <meta name="description" content="Combos de fiambres, picadas y promos de almacén con descuento, actualizadas cada semana.">
+  <meta name="theme-color" content="#1A1625">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+
+<body data-pagina="ofertas">
+
+  <header id="sitio-header"></header>
+
+  <main>
+    <section class="encabezado-pagina">
+      <div class="contenedor">
+        <div class="migas"><a href="../index.html">Inicio</a> › Ofertas</div>
+        <h1>Ofertas de la semana</h1>
+        <p>Promos vigentes de lunes a sábado o mientras dure el stock. Los combos se arman en el momento.</p>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="contenedor">
+        <div class="seccion-encabezado">
+          <div>
+            <h2 class="seccion-titulo">Combos y promos</h2>
+            <p class="seccion-bajada">Tocá “Agregar al pedido” y después confirmás por WhatsApp</p>
+            <div class="linea-dorada"></div>
+          </div>
+        </div>
+        <div class="grilla-ofertas" id="grilla-ofertas"></div>
+      </div>
+    </section>
+
+    <!-- ====== OFERTAS DE LA SEMANA ====== -->
+    <section class="seccion seccion-alterna sin-tope">
+      <div class="contenedor">
+        <div class="seccion-encabezado">
+          <div>
+            <h2 class="seccion-titulo">Ofertas de la semana</h2>
+            <p class="seccion-bajada">Los precios que bajamos esta semana — movelas con las flechas</p>
+            <div class="linea-dorada"></div>
+          </div>
+        </div>
+        <div id="cinta-semana"></div>
+      </div>
+    </section>
+
+    <!-- ====== EL RESTO, POR RUBRO ====== -->
+    <section class="seccion">
+      <div class="contenedor">
+        <div class="seccion-encabezado">
+          <div>
+            <h2 class="seccion-titulo">Otras ofertas por rubro</h2>
+            <p class="seccion-bajada">Ordenadas por categoría, para que encuentres lo que buscás</p>
+            <div class="linea-dorada"></div>
+          </div>
+        </div>
+        <div id="ofertas-rubros"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="sitio-footer"></footer>
+
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/carrito.js"></script>
+  <script src="../assets/js/usuarios.js"></script>
+  <script src="../assets/js/header.js"></script>
+  <script src="../assets/js/ofertas.js"></script>
+  <script src="../assets/js/catalogo.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      /* Las dos cintas de abajo se manejan con flechas, no solas */
+      FB.catalogo.carruselManual('cinta-semana', FB.ofertasSemana());
+      FB.catalogo.ofertasPorCategoria('ofertas-rubros');
+    });
+  </script>
+</body>
+</html>

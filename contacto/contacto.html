@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contacto — Fiambrería 4 Quesos</title>
+  <meta name="description" content="Escribinos por WhatsApp, mail o dejanos tu consulta desde el formulario. También atendemos pedidos para eventos.">
+  <meta name="theme-color" content="#1A1625">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+
+<body data-pagina="contacto">
+
+  <header id="sitio-header"></header>
+
+  <main>
+    <section class="encabezado-pagina">
+      <div class="contenedor">
+        <div class="migas"><a href="../index.html">Inicio</a> › Contacto</div>
+        <h1>Contacto</h1>
+        <p>Consultas, pedidos para eventos o reclamos: por WhatsApp contestamos más rápido, pero el formulario también nos llega.</p>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="contenedor contacto-grid">
+
+        <!-- Formulario -->
+        <div class="caja">
+          <h2>Dejanos tu mensaje</h2>
+          <form class="formulario formulario-plano" id="form-contacto" novalidate>
+            <div class="mensaje-form" id="msj-contacto"></div>
+
+            <div class="campo">
+              <label for="c-nombre">Nombre y apellido</label>
+              <input type="text" id="c-nombre" placeholder="Juan Pérez">
+              <small class="campo-error">Escribí tu nombre.</small>
+            </div>
+
+            <div class="campo">
+              <label for="c-email">Correo electrónico</label>
+              <input type="email" id="c-email" placeholder="tucorreo@mail.com">
+              <small class="campo-error">Ingresá un correo válido.</small>
+            </div>
+
+            <div class="campo">
+              <label for="c-tel">Teléfono / WhatsApp</label>
+              <input type="tel" id="c-tel" placeholder="388 400-0000">
+              <small class="campo-error">Ingresá un teléfono válido.</small>
+            </div>
+
+            <div class="campo">
+              <label for="c-motivo">Motivo</label>
+              <select id="c-motivo">
+                <option>Consulta general</option>
+                <option>Pedido para evento o reunión</option>
+                <option>Estado de un pedido</option>
+                <option>Trabajá con nosotros</option>
+                <option>Reclamo o sugerencia</option>
+              </select>
+            </div>
+
+            <div class="campo">
+              <label for="c-mensaje">Mensaje</label>
+              <textarea id="c-mensaje" rows="4" placeholder="Contanos qué necesitás…"></textarea>
+              <small class="campo-error">Escribí al menos 10 caracteres.</small>
+            </div>
+
+            <button type="submit" class="btn btn-ciruela btn-bloque">Enviar mensaje</button>
+            <p class="nota-form">Respondemos de lunes a sábado dentro del horario del local.</p>
+          </form>
+        </div>
+
+        <!-- Datos -->
+        <div>
+          <div class="caja">
+            <h2>Datos de contacto</h2>
+            <ul class="lista-contacto" id="lista-contacto"></ul>
+          </div>
+
+          <div class="caja mt-4">
+            <h2>Seguinos</h2>
+            <p>
+              Publicamos las ofertas del día y las picadas nuevas en Instagram y WhatsApp.
+            </p>
+            <a class="btn btn-oro btn-bloque mt-4" data-wsp href="#">
+              Escribir por WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="sitio-footer"></footer>
+
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/carrito.js"></script>
+  <script src="../assets/js/usuarios.js"></script>
+  <script src="../assets/js/header.js"></script>
+  <script src="../assets/js/ofertas.js"></script>
+  <script src="../assets/js/catalogo.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+      /* Datos de contacto. Todo sale de FB.empresa y FB.sucursales:
+         antes acá figuraba una tercera dirección que no era ninguna
+         de las dos sucursales. */
+      const i = FB.ico;
+      const s0 = FB.sucursales[0];
+      document.getElementById('lista-contacto').innerHTML = `
+        <li>${i.pin}<div><strong>${s0.nombre}</strong><span>${s0.direccion}</span></div></li>
+        <li>${i.tel}<div><strong>Teléfono</strong><span>${FB.empresa.telefono}</span></div></li>
+        <li>${i.wsp}<div><strong>WhatsApp</strong><span>${FB.empresa.telefono}</span></div></li>
+        <li>${i.mail}<div><strong>Correo</strong><span>${FB.empresa.correo}</span></div></li>
+        <li>${i.reloj}<div><strong>Horarios</strong><span>${s0.horario}</span></div></li>`;
+
+      /* Validación del formulario */
+      const form = document.getElementById('form-contacto');
+      const marcar = (el, ok) => { el.closest('.campo').classList.toggle('con-error', !ok); return ok; };
+      const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim());
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const nombre  = document.getElementById('c-nombre');
+        const email   = document.getElementById('c-email');
+        const tel     = document.getElementById('c-tel');
+        const mensaje = document.getElementById('c-mensaje');
+
+        let ok = true;
+        ok = marcar(nombre,  nombre.value.trim().length >= 3) && ok;
+        ok = marcar(email,   emailOk(email.value))           && ok;
+        ok = marcar(tel,     tel.value.replace(/\D/g,'').length >= 8) && ok;
+        ok = marcar(mensaje, mensaje.value.trim().length >= 10) && ok;
+
+        const m = document.getElementById('msj-contacto');
+        if (!ok) {
+          m.textContent = 'Revisá los campos marcados en rojo.';
+          m.className = 'mensaje-form mal';
+          return;
+        }
+
+        /* Acá va el envío real (PHP, Formspree, EmailJS, etc.).
+           Por ahora sólo se muestra el aviso de éxito. */
+        m.textContent = '¡Gracias! Recibimos tu mensaje y te respondemos a la brevedad.';
+        m.className = 'mensaje-form ok';
+        form.reset();
+        FB.aviso('Mensaje enviado');
+      });
+    });
+  </script>
+</body>
+</html>

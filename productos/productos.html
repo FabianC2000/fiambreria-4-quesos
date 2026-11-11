@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Productos — Fiambrería 4 Quesos</title>
+  <meta name="description" content="Catálogo completo: fiambres y quesos por 100 g, media barra o kilo, y productos de almacén por unidad.">
+  <meta name="theme-color" content="#1A1625">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+
+<body data-pagina="productos">
+
+  <header id="sitio-header"></header>
+
+  <main>
+    <section class="encabezado-pagina">
+      <div class="contenedor">
+        <div class="migas"><a href="../index.html">Inicio</a> › Productos</div>
+        <h1>Catálogo</h1>
+        <p>Los fiambres y quesos se venden por 100 g, media barra o kilo. El resto, por unidad y con precio especial llevando 2 o 6.</p>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="contenedor">
+        <div id="filtros-catalogo"></div>
+
+        <div class="seccion-encabezado">
+          <div>
+            <h2 class="seccion-titulo" id="titulo-catalogo">Todos los productos</h2>
+            <div class="linea-dorada"></div>
+          </div>
+        </div>
+
+        <div id="grilla-catalogo"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="sitio-footer"></footer>
+
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/carrito.js"></script>
+  <script src="../assets/js/usuarios.js"></script>
+  <script src="../assets/js/header.js"></script>
+  <script src="../assets/js/ofertas.js"></script>
+  <script src="../assets/js/catalogo.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      /* Lee ?cat= y ?q= de la dirección, así el buscador del
+         header y las categorías llegan filtradas */
+      FB.catalogo.catalogoFiltrable('filtros-catalogo', 'grilla-catalogo');
+    });
+  </script>
+</body>
+</html>

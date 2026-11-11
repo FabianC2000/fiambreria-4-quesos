@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sucursales — Fiambrería 4 Quesos</title>
+  <meta name="description" content="Direcciones, horarios y teléfonos de las tres sucursales de 4 Quesos donde retirar tu pedido.">
+  <meta name="theme-color" content="#1A1625">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+
+<body data-pagina="sucursales">
+
+  <header id="sitio-header"></header>
+
+  <main>
+    <section class="encabezado-pagina">
+      <div class="contenedor">
+        <div class="migas"><a href="../index.html">Inicio</a> › Sucursales</div>
+        <h1>Nuestras sucursales</h1>
+        <p>Todos los pedidos se retiran por el local. Elegí la sucursal que te quede más cómoda y la dejamos guardada para tus próximos pedidos.</p>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="contenedor">
+        <div id="grilla-sucursales"></div>
+
+        <section class="mt-6">
+          <div class="seccion-encabezado">
+            <div>
+              <h2 class="seccion-titulo">Conocé el local por dentro</h2>
+              <p class="seccion-bajada">Así es la góndola donde vas a retirar tu pedido</p>
+            </div>
+          </div>
+          <div id="galeria-local"></div>
+        </section>
+
+        <div class="caja mt-5">
+          <h2>Cómo funciona el retiro</h2>
+          <p>
+            No hacemos envíos a domicilio. Hacés el pedido desde la web, te confirmamos por WhatsApp
+            en cuánto tiempo está listo y lo pasás a buscar por la sucursal que elegiste. Los pedidos
+            quedan guardados hasta el cierre del día; si no llegás a pasar, avisanos y lo dejamos
+            para el día siguiente. Se paga al retirar.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="sitio-footer"></footer>
+
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/carrito.js"></script>
+  <script src="../assets/js/usuarios.js"></script>
+  <script src="../assets/js/header.js"></script>
+  <script src="../assets/js/ofertas.js"></script>
+  <script src="../assets/js/catalogo.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      FB.catalogo.sucursales('grilla-sucursales');
+      FB.catalogo.fotosLocal('galeria-local');
+    });
+  </script>
+</body>
+</html>

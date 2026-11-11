@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fiambrería 4 Quesos — Fiambres, quesos y picadas en Jujuy</title>
+  <meta name="description" content="Fiambres y quesos cortados al momento, picadas armadas y ofertas de la semana. Pedí online y retiralo por el local. Tres sucursales en Jujuy.">
+  <meta name="theme-color" content="#1A1625">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <!-- RAIZ: '' porque este archivo está en la carpeta principal -->
+  <script>window.RAIZ = '';</script>
+</head>
+
+<body data-pagina="inicio">
+
+  <!-- ====== HEADER (lo dibuja assets/js/header.js) ====== -->
+  <header id="sitio-header"></header>
+
+  <main>
+
+    <!-- ====== PORTADA: tarjetas de ofertas que cambian solas ====== -->
+    <section class="portada">
+      <div class="contenedor">
+        <div class="ofertas-portada" id="ofertas-portada"></div>
+
+        <!-- Datos del local: una línea bajo la portada, sin cajas.
+             Los íconos salen del mismo set que el header (FB.ico). -->
+        <div class="cinta-fila" id="cinta-fila"></div>
+      </div>
+    </section>
+
+    <!-- ====== CATEGORÍAS ====== -->
+    <section class="seccion">
+      <div class="contenedor">
+        <div class="seccion-encabezado">
+          <div>
+            <h2 class="seccion-titulo">Comprá por categoría</h2>
+            <p class="seccion-bajada">Tocá el rubro que buscás y te llevamos directo</p>
+            <div class="linea-dorada"></div>
+          </div>
+        </div>
+        <!-- Tira de accesos rápidos: una fila de íconos con el
+             nombre abajo. Son sólo las de FB.catsPortada; la lista
+             completa está en el menú del header y en categorias.html. -->
+        <div id="tira-categorias"></div>
+      </div>
+    </section>
+
+    <!-- ====== LOS MÁS PEDIDOS (todos los productos) ====== -->
+    <section class="seccion seccion-alterna">
+      <div class="contenedor">
+        <div class="seccion-encabezado">
+          <div>
+            <h2 class="seccion-titulo">Los más pedidos</h2>
+            <p class="seccion-bajada">Pasan solos — apoyá el mouse encima para frenar y elegir</p>
+            <div class="linea-dorada"></div>
+          </div>
+          <a class="btn btn-linea" href="productos/productos.html">Ver el catálogo</a>
+        </div>
+      </div>
+      <!-- Las cintas van fuera del contenedor para ocupar todo el ancho -->
+      <div id="cinta-pedidos"></div>
+    </section>
+
+    <!-- ====== EN OFERTA ====== -->
+    <section class="seccion">
+      <div class="contenedor">
+        <div class="seccion-encabezado">
+          <div>
+            <h2 class="seccion-titulo">En oferta</h2>
+            <p class="seccion-bajada">Precios de esta semana, mientras dure el stock</p>
+            <div class="linea-dorada"></div>
+          </div>
+          <a class="btn btn-linea" href="ofertas/ofertas.html">Ver todas las ofertas</a>
+        </div>
+      </div>
+      <div id="cinta-ofertas"></div>
+    </section>
+
+    <!-- ====== FIAMBRES ====== -->
+    <section class="seccion seccion-alterna">
+      <div class="contenedor">
+        <div class="seccion-encabezado">
+          <div>
+            <h2 class="seccion-titulo">Fiambres</h2>
+            <p class="seccion-bajada">Jamones, salames y mortadelas, cortados como los pedís</p>
+            <div class="linea-dorada"></div>
+          </div>
+          <a class="btn btn-linea" href="productos/productos.html?cat=fiambres">Ver todos</a>
+        </div>
+      </div>
+      <div id="cinta-fiambres"></div>
+    </section>
+
+    <!-- ====== RECIÉN LLEGADOS ====== -->
+    <section class="seccion">
+      <div class="contenedor">
+        <div class="seccion-encabezado">
+          <div>
+            <h2 class="seccion-titulo">Recién llegados</h2>
+            <p class="seccion-bajada">Lo último que sumamos a las vitrinas</p>
+            <div class="linea-dorada"></div>
+          </div>
+        </div>
+      </div>
+      <div id="cinta-novedades"></div>
+    </section>
+
+  </main>
+
+  <!-- ====== FOOTER (lo dibuja assets/js/header.js) ====== -->
+  <footer id="sitio-footer"></footer>
+
+  <!-- ====== SCRIPTS (este orden importa) ====== -->
+  <script src="assets/js/productos.js"></script>
+  <script src="assets/js/carrito.js"></script>
+  <script src="assets/js/usuarios.js"></script>
+  <script src="assets/js/header.js"></script>
+  <script src="assets/js/ofertas.js"></script>
+  <script src="assets/js/catalogo.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+      /* Datos del local, con los mismos íconos del header */
+      const i = FB.ico;
+      document.getElementById('cinta-fila').innerHTML = [
+        [i.caja,    'Pedí y retirá',      'Lo dejamos listo para cuando pases'],
+        [i.escudo,  'Cortado al momento', 'Como lo pedís, finito o grueso'],
+        [i.tarjeta, 'Todos los pagos',    'Efectivo, débito, crédito y QR'],
+        [i.pin,     '2 sucursales',       'Avenida Corrientes y la segunda en Jujuy']
+      ].map(([ico, titulo, bajada]) =>
+        `<div class="cinta">${ico}<div><h4>${titulo}</h4><p>${bajada}</p></div></div>`
+      ).join('');
+
+      FB.catalogo.tiraCategorias('tira-categorias');
+
+      /* Las cuatro cintas. Si una categoría tiene menos de 6
+         productos, carrusel() la muestra en grilla sola. */
+      FB.catalogo.carrusel('cinta-pedidos',   FB.productos);
+      FB.catalogo.carrusel('cinta-ofertas',   FB.enOferta());
+      FB.catalogo.carrusel('cinta-fiambres',  FB.porCategoria('fiambres'));
+      /* Los últimos cargados: el orden de FB.productos es el orden
+         en que se fueron sumando, así que los recién llegados son
+         los del final. */
+      FB.catalogo.carrusel('cinta-novedades', FB.productos.slice(-8));
+    });
+  </script>
+</body>
+</html>
