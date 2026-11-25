@@ -17,6 +17,10 @@ return [
     'base'   => 'fiambreria_4quesos',
     'u'      => 'root',
     'clave'  => '',
+    /* 3306 es el puerto normal, pero si ya tenés otro MySQL
+       instalado (MySQL Workbench, por ejemplo) ese se queda con el
+       3306 y XAMPP arranca en 3307. El puerto real lo muestra el
+       panel de XAMPP al lado de MySQL. */
     'puerto' => 3306,
 
     /* true mientras desarrollás: muestra el error de la base en

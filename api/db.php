@@ -4,6 +4,13 @@ declare(strict_types=1);
 /* Conexión a MySQL y utilidades compartidas.
    Todo lo que toque la base pasa por acá. */
 
+/* PHP sin zona horaria configurada usa la del servidor, que en XAMPP
+   y en la mayoría de los hostings no es la de acá. Sin esta línea,
+   la hora de los pedidos, las fechas de alta de clientes y el
+   cálculo de "¿está abierto ahora?" quedarían corridos varias horas
+   sin que nada avise. Se fija una sola vez, para todo el backend. */
+date_default_timezone_set('America/Argentina/Jujuy');
+
 function fb_config(): array
 {
     static $config = null;
