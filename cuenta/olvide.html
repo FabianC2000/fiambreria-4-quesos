@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recuperar la contraseña — Fiambrería 4 Quesos</title>
+  <meta name="description" content="Pedí un enlace para elegir una contraseña nueva en Fiambrería 4 Quesos.">
+  <meta name="theme-color" content="#1B1420">
+  <!-- Nada que buscar acá, y menos que quede indexado. -->
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/cuenta.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+
+<body data-pagina="cuenta">
+  <div id="sitio-header"></div>
+
+  <main class="cuenta-marco">
+    <!-- El título y el texto los escribe cuenta.js: la misma
+         pantalla sirve para pedir la contraseña nueva y para que
+         reenviemos el correo de confirmación. -->
+    <h1 id="titulo">Recuperar la contraseña</h1>
+    <p class="entrada" id="entrada">Escribí tu correo y te mandamos un enlace para elegir una nueva.</p>
+
+    <div id="nota" role="status" hidden></div>
+
+    <form id="form-olvide" novalidate>
+      <div class="campo">
+        <label for="correo">Correo electrónico
+          <span class="pista">El que usaste para crear la cuenta.</span></label>
+        <input id="correo" name="correo" type="email" autocomplete="email" required maxlength="190">
+        <span class="error" id="e-correo" hidden></span>
+      </div>
+
+      <button class="btn btn-ciruela" type="submit" id="btn-pedir">Mandarme el enlace</button>
+    </form>
+
+    <p class="pie-cuenta" id="otro-modo"></p>
+    <p class="pie-cuenta"><a href="ingresar.html">Volver al ingreso</a></p>
+  </main>
+
+  <div id="sitio-footer"></div>
+
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/metricas.js"></script>
+  <script src="../assets/js/carrito.js"></script>
+  <script src="../assets/js/usuarios.js"></script>
+  <script src="../assets/js/header.js"></script>
+  <script src="../assets/js/cuenta.js"></script>
+  <script>FB.cuenta.olvido();</script>
+</body>
+</html>

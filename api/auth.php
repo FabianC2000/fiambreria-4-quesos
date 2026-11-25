@@ -11,6 +11,17 @@ require_once __DIR__ . '/db.php';
    que es lo único que sirve como prueba. */
 const FB_VERSION_LEGAL = '2026-11';
 
+/* El enlace de verificación dura dos días: la persona ya está
+   registrada y no hay apuro. El de contraseña nueva dura dos horas:
+   es el que permite entrar a la cuenta, así que cuanto menos tiempo
+   quede vivo, mejor. */
+const FB_HORAS_VERIFICACION = 48;
+const FB_HORAS_RECUPERACION = 2;
+
+/* Cuántos correos de cuenta se pueden pedir por hora para una misma
+   cuenta, sumando verificaciones y recuperaciones. */
+const FB_MAX_CORREOS_HORA = 3;
+
 function fb_sesion(): void
 {
     if (session_status() === PHP_SESSION_ACTIVE) {
@@ -94,7 +105,8 @@ function fb_cliente_actual(): ?array
         return null;
     }
     $st = fb_db()->prepare(
-        'SELECT id, nombre, apellido, correo, telefono, rol, verificado, sucursal_preferida
+        'SELECT id, nombre, apellido, correo, telefono, rol, verificado, sucursal_preferida,
+                UNIX_TIMESTAMP(clave_cambiada) AS clave_cambiada
          FROM clientes WHERE id = ? AND activo = 1');
     $st->execute([$_SESSION['cliente_id']]);
     $c = $st->fetch();
@@ -103,6 +115,21 @@ function fb_cliente_actual(): ?array
         fb_cerrar_sesion();
         return null;
     }
+
+    /* Si la contraseña se cambió después de que empezó esta sesión,
+       la sesión ya no vale. Es lo que hace que cambiar la contraseña
+       eche a quien estuviera entrado en otro dispositivo, que es el
+       sentido de cambiarla cuando uno sospecha que se la robaron.
+
+       Se comparan dos marcas de tiempo absolutas (UNIX_TIMESTAMP del
+       lado de MySQL, time() del lado de PHP), no fechas escritas:
+       así da igual en qué zona horaria esté configurado cada uno. */
+    $cambio = $c['clave_cambiada'] !== null ? (int) $c['clave_cambiada'] : 0;
+    if ($cambio > 0 && (int) ($_SESSION['desde'] ?? 0) < $cambio) {
+        fb_cerrar_sesion();
+        return null;
+    }
+    unset($c['clave_cambiada']);
     return $c;
 }
 
@@ -213,6 +240,41 @@ function fb_mirar_token(PDO $db, string $token, string $tipo): ?array
 function fb_consumir_token(PDO $db, int $tokenId): void
 {
     $db->prepare('UPDATE tokens SET usado = NOW() WHERE id = ?')->execute([$tokenId]);
+}
+
+/* Anula de una todos los tokens pendientes de un tipo. Se usa al
+   consumir uno: si alguien pidió tres veces la contraseña nueva, el
+   primero que use deja sin efecto a los otros dos. */
+function fb_anular_tokens(PDO $db, int $clienteId, string $tipo): void
+{
+    $db->prepare('UPDATE tokens SET usado = NOW()
+                  WHERE cliente_id = ? AND tipo = ? AND usado IS NULL')
+       ->execute([$clienteId, $tipo]);
+}
+
+/* Cuántos tokens de este tipo se le crearon en los últimos minutos.
+
+   Con esto se limita cuántos correos se pueden disparar por cuenta.
+   El límite va por cuenta y no por dirección IP a propósito: el
+   mensaje siempre se manda a la casilla registrada, así que lo único
+   que se puede hacer con esto es llenarle el correo a un cliente
+   real, y eso se corta contando por cuenta. */
+function fb_tokens_recientes(PDO $db, int $clienteId, string $tipo, int $minutos): int
+{
+    $st = $db->prepare('SELECT COUNT(*) FROM tokens
+                        WHERE cliente_id = ? AND tipo = ?
+                          AND creado > DATE_SUB(NOW(), INTERVAL ? MINUTE)');
+    $st->execute([$clienteId, $tipo, $minutos]);
+    return (int) $st->fetchColumn();
+}
+
+/* Tapa una dirección para mostrarla sin exponerla entera:
+   fabian@gmail.com → fa****@gmail.com */
+function fb_correo_tapado(string $correo): string
+{
+    [$usuario, $dominio] = array_pad(explode('@', $correo, 2), 2, '');
+    $visible = mb_substr($usuario, 0, min(2, max(1, mb_strlen($usuario) - 1)));
+    return $visible . str_repeat('*', 4) . '@' . $dominio;
 }
 
 /* ------------------------------------------------------------

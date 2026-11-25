@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Elegir una contraseña nueva — Fiambrería 4 Quesos</title>
+  <meta name="description" content="Elegí una contraseña nueva para tu cuenta de Fiambrería 4 Quesos.">
+  <meta name="theme-color" content="#1B1420">
+  <!-- Esta dirección llega con un token en la URL: no tiene que
+       quedar indexada ni guardada en ningún buscador. -->
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/cuenta.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+
+<body data-pagina="cuenta">
+  <div id="sitio-header"></div>
+
+  <main class="cuenta-marco">
+    <h1>Elegí una contraseña nueva</h1>
+    <p class="entrada" id="para-quien">Verificando el enlace…</p>
+
+    <div id="nota" role="status" hidden></div>
+
+    <form id="form-restablecer" novalidate>
+      <div class="campo">
+        <label for="clave">Contraseña nueva <span class="pista">Mínimo 8 caracteres.</span></label>
+        <input id="clave" name="clave" type="password" autocomplete="new-password" required minlength="8">
+        <div class="fuerza" id="fuerza" data-nivel="0" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <span class="error" id="e-clave" hidden></span>
+      </div>
+
+      <!-- Se pide dos veces porque el enlace se gasta al usarlo: con
+           un error de tecleo habría que pedir otro correo y
+           esperarlo de nuevo. -->
+      <div class="campo">
+        <label for="repetir">Repetila</label>
+        <input id="repetir" name="repetir" type="password" autocomplete="new-password" required minlength="8">
+        <span class="error" id="e-repetir" hidden></span>
+      </div>
+
+      <button class="btn btn-ciruela" type="submit" id="btn-cambiar">Guardar la contraseña</button>
+    </form>
+
+    <p class="pie-cuenta"><a href="ingresar.html">Volver al ingreso</a></p>
+  </main>
+
+  <div id="sitio-footer"></div>
+
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/metricas.js"></script>
+  <script src="../assets/js/carrito.js"></script>
+  <script src="../assets/js/usuarios.js"></script>
+  <script src="../assets/js/header.js"></script>
+  <script src="../assets/js/cuenta.js"></script>
+  <script>FB.cuenta.restablecer();</script>
+</body>
+</html>

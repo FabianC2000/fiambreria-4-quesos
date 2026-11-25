@@ -85,35 +85,40 @@ try {
     fb_registrar_consentimiento($db, $clienteId, 'terminos', true);
     fb_registrar_consentimiento($db, $clienteId, 'ofertas', $ofertas);
 
-    $token = fb_crear_token($db, $clienteId, 'verificacion', 48);
+    $token = fb_crear_token($db, $clienteId, 'verificacion', FB_HORAS_VERIFICACION);
 
     $db->commit();
 
+    /* El correo se manda después del commit, a propósito: si el
+       relay está caído, la cuenta ya quedó creada y la persona puede
+       pedir el reenvío. Al revés —mandar primero y confirmar
+       después— se perdería la cuenta por un problema de red. */
     $base = rtrim((string) (fb_config()['url_base'] ?? ''), '/');
     $enlace = $base . '/api/verificar.php?t=' . $token;
 
-    $cuerpo = '<p>Hola ' . htmlspecialchars($nombre, ENT_QUOTES) . ', gracias por crear tu cuenta.</p>'
-            . '<p>Confirmá que esta casilla es tuya para poder usarla:</p>'
-            . fb_boton_correo($enlace, 'Confirmar mi correo')
-            . '<p style="font-size:13px;color:#6B6075">El enlace vence en 48 horas. '
-            . 'Si no fuiste vos quien se registró, ignorá este mensaje.</p>';
+    [$asunto, $html] = fb_correo_verificacion($nombre, $enlace, $ofertas);
 
-    $pie = $ofertas
-        ? 'Pediste recibir nuestras ofertas. Vas a poder darte de baja desde cualquier correo que te mandemos.'
-        : 'No vas a recibir ofertas: solo mensajes necesarios de tu cuenta.';
-
-    $enviado = fb_enviar_correo($correo, 'Confirmá tu correo — Fiambrería 4 Quesos',
-                                fb_plantilla_correo('Confirmá tu correo', $cuerpo, $pie));
+    $motivo = null;
+    $enviado = fb_enviar_correo($correo, $asunto, $html, '', $motivo);
+    if (!$enviado) {
+        error_log("registro.php: no pude mandar la verificación a $correo — " . (string) $motivo);
+    }
 
     $respuesta = [
         'ok' => true,
-        'mensaje' => 'Cuenta creada. Te mandamos un correo para confirmar la dirección.',
+        'mensaje' => $enviado
+            ? 'Cuenta creada. Te mandamos un correo para confirmar la dirección.'
+            : 'Tu cuenta quedó creada, pero no pudimos mandarte el correo de '
+            . 'confirmación. Probá pedirlo de nuevo en un rato.',
         'correo_enviado' => $enviado,
     ];
     /* En desarrollo se devuelve el enlace para poder probar el flujo
        sin servidor de correo. Nunca con depurar en false. */
     if (!empty(fb_config()['depurar'])) {
         $respuesta['enlace_verificacion'] = $enlace;
+        if (!$enviado) {
+            $respuesta['motivo'] = $motivo;
+        }
     }
     fb_json($respuesta, 201);
 

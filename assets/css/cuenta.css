@@ -68,17 +68,30 @@
 .pie-cuenta{
   text-align:center;margin-top:var(--e-6);font-size:var(--t-s);color:#6B6075;
 }
+/* Cuando hay dos seguidos (ingresar.html tiene el "me olvidé la
+   contraseña" y el "creá tu cuenta") van juntos, como un bloque de
+   salidas, y no separados como si no tuvieran nada que ver. */
+.pie-cuenta + .pie-cuenta{margin-top:var(--e-3)}
+.pie-cuenta:empty{display:none}
 .pie-cuenta a{color:var(--ciruela)}
 
-/* ---------- avisos ---------- */
-.aviso{
+/* ---------- carteles de la pantalla ----------
+   Se llama 'nota' y no 'aviso' a propósito: .aviso ya existe en
+   style.css y es el cartelito flotante que aparece abajo cuando
+   agregás algo al carrito. Es position:fixed y arranca en
+   opacity:0 hasta que le ponen la clase .visible.
+
+   Cuando estas pantallas usaban el mismo nombre, los mensajes de
+   error y de éxito quedaban en el documento pero invisibles: se
+   apretaba "Entrar", fallaba, y en la pantalla no pasaba nada. */
+.nota{
   border-radius:var(--r-s);padding:var(--e-4);margin-bottom:var(--e-5);font-size:var(--t-s);
 }
-.aviso-mal{background:#FBE9EB;color:#7A1C28;border:1px solid #F0CDD2}
-.aviso-bien{background:#E8F3EC;color:#1E5233;border:1px solid #BFE0CB}
-.aviso a{color:inherit;font-weight:600}
-.aviso p{margin:0}
-.aviso p + p{margin-top:var(--e-2)}
+.nota-mal{background:#FBE9EB;color:#7A1C28;border:1px solid #F0CDD2}
+.nota-bien{background:#E8F3EC;color:#1E5233;border:1px solid #BFE0CB}
+.nota a{color:inherit;font-weight:600}
+.nota p{margin:0}
+.nota p + p{margin-top:var(--e-2)}
 
 /* Medidor simple de la contraseña: acompaña al texto, no lo reemplaza. */
 .fuerza{display:flex;gap:4px;margin-top:var(--e-2)}

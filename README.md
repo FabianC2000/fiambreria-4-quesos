@@ -77,8 +77,18 @@ Para montarla en XAMPP:
 ```bash
 mysql -u root < sql/01-esquema.sql
 mysql -u root < sql/02-catalogo.sql
+mysql -u root < sql/03-clientes.sql
+mysql -u root < sql/04-recuperacion.sql
 cp api/config.example.php api/config.php    # y completá usuario y clave
 ```
+
+Si XAMPP arrancó MySQL en otro puerto —pasa cuando ya hay un MySQL Workbench
+ocupando el 3306— hay que agregárselo a cada línea: `mysql -u root -P 3307 < …`,
+y poner el mismo número en `'puerto'` dentro de `config.php`.
+
+Las dos primeras migraciones borran y recrean sus tablas; `04` no, porque para
+cuando se corre ya puede haber clientes registrados: usa `ALTER TABLE` y se
+puede correr dos veces sin romper nada.
 
 `01-esquema.sql` crea las tablas: `empresa`, `categorias`, `subcategorias`,
 `productos`, `precios`, `sucursales` y `horarios`, más la vista `v_catalogo`
@@ -104,7 +114,52 @@ Dos decisiones que conviene conocer antes de tocar el esquema:
   precios en la base, corrés esto, subís el archivo. Escribe en el disco, así
   que solo responde desde `localhost`; deja un `.bak` antes de pisar nada.
 - **`config.php`** no está en el repositorio porque lleva la contraseña de la
-  base. Copiá `config.example.php`.
+  base y la clave del correo. Copiá `config.example.php`.
+
+## Cuentas de cliente
+
+`03-clientes.sql` agrega `clientes`, `tokens` y `consentimientos`;
+`04-recuperacion.sql` suma la columna que permite cerrar sesiones viejas.
+
+Los endpoints son `registro.php`, `ingresar.php`, `verificar.php`, `salir.php`,
+`yo.php`, `olvide.php`, `restablecer.php` y `reenviar.php`, y las pantallas
+están en `cuenta/`.
+
+Tres decisiones que conviene conocer:
+
+- **El consentimiento es un registro fechado, no una casilla.** Cada vez que
+  alguien acepta o deja de aceptar algo se agrega una fila con la fecha, la
+  versión del texto que leyó, la IP y el navegador. Una casilla diría cómo está
+  hoy; esto dice qué aceptó y cuándo, que es lo único que sirve si alguien
+  reclama. Para mandar ofertas hay que consultar `v_suscriptores_ofertas`,
+  nunca la tabla directa.
+- **Pedir la contraseña nueva contesta siempre lo mismo**, exista o no la
+  cuenta. Si dijera "ese correo no está registrado", cualquiera podría
+  averiguar quién es cliente probando direcciones. En el registro sí se avisa
+  que el correo ya está tomado: ahí la alternativa sería dejar a alguien sin
+  poder registrarse sin entender por qué.
+- **Cambiar la contraseña cierra las sesiones abiertas en otros dispositivos**,
+  comparando `clientes.clave_cambiada` contra el momento en que empezó cada
+  sesión. Sin eso, cambiarla no echaría a nadie, que es justo lo que uno quiere
+  cuando sospecha que se la robaron.
+
+### Correo
+
+`api/correo.php` tiene dos modos, que se eligen con `correo_modo`:
+
+- **`archivo`** (para desarrollar): guarda cada mensaje en `almacen/correos/`
+  como un `.html` que se abre con doble clic. No necesita internet.
+- **`smtp`**: manda de verdad. `api/smtp.php` es un cliente SMTP propio, de unas
+  doscientas líneas, sin dependencias: habla STARTTLS, autentica, y arma el
+  mensaje en dos versiones (texto y HTML) con los acentos codificados como
+  manda el RFC 2047. Está probado contra un servidor SMTP de prueba, incluidos
+  los casos que tienen que fallar: credenciales rechazadas, certificado que no
+  se puede verificar, servidor que no contesta y servidor sin STARTTLS (ahí
+  corta en vez de mandar la clave en claro).
+
+Para Brevo hacen falta `smtp_usuario` y `smtp_clave` en `config.php`. La clave
+es una **clave SMTP** generada en el panel, no la API key, y el usuario es el
+login de la cuenta, nunca `smtp-relay.brevo.com`.
 
 ## Ejecutarlo localmente
 
@@ -122,3 +177,12 @@ El sitio está terminado como interfaz. Falta contenido que depende del local:
 las fotos de varios productos, algunos precios y los datos legales definitivos
 de las páginas de términos y políticas, que además necesitan revisión de alguien
 con formación legal antes de publicarse como válidas.
+
+Pendientes del lado técnico:
+
+- Conectar el carrito con la cuenta, para que los pedidos queden guardados
+  (faltan las tablas `pedidos` y `pedido_items`).
+- Antes de abrir el formulario al público, Víctor Hugo Farfán, como responsable
+  de la base, tiene que inscribirla en el Registro Nacional de Bases de Datos de
+  la AAIP. El trámite es gratuito y se hace en línea; lo pide el artículo 21 de
+  la Ley 25.326.
