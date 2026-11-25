@@ -67,6 +67,45 @@ muestra lo de esa máquina y no la suma de todos los clientes. El propio tablero
 lo aclara en pantalla y permite exportar e importar el registro para consolidar
 varios equipos a mano.
 
+## Base de datos
+
+El catálogo está migrado a MySQL. La base es la fuente de verdad; el archivo
+`assets/js/productos.js` pasó a ser una exportación.
+
+Para montarla en XAMPP:
+
+```bash
+mysql -u root < sql/01-esquema.sql
+mysql -u root < sql/02-catalogo.sql
+cp api/config.example.php api/config.php    # y completá usuario y clave
+```
+
+`01-esquema.sql` crea las tablas: `empresa`, `categorias`, `subcategorias`,
+`productos`, `precios`, `sucursales` y `horarios`, más la vista `v_catalogo`
+que devuelve cada producto con sus precios ya en columnas.
+`02-catalogo.sql` carga los datos actuales: 14 categorías, 20 subcategorías,
+28 productos, 84 precios, 2 sucursales y 26 turnos horarios.
+
+Dos decisiones que conviene conocer antes de tocar el esquema:
+
+- **Los precios van en una tabla aparte, no en columnas de `productos`.** Un
+  fiambre se vende por 100 g, media barra y kilo; un envasado por unidad, 2 y 6.
+  Con columnas fijas la mitad quedaría siempre vacía.
+- **Los productos no se borran, se archivan** (`activo = 0`). Un producto
+  borrado dejaría sin referencia a los pedidos viejos que lo incluyen.
+
+### `api/`
+
+- **`catalogo.php`** — devuelve todo el catálogo en JSON, con la misma forma que
+  hoy tiene `FB` en productos.js. Es lo que va a consumir el sitio cuando esté
+  en un hosting con PHP.
+- **`exportar-js.php`** — regenera `assets/js/productos.js` desde la base. Es el
+  puente mientras el sitio público siga siendo estático en GitHub Pages: cambiás
+  precios en la base, corrés esto, subís el archivo. Escribe en el disco, así
+  que solo responde desde `localhost`; deja un `.bak` antes de pisar nada.
+- **`config.php`** no está en el repositorio porque lleva la contraseña de la
+  base. Copiá `config.example.php`.
+
 ## Ejecutarlo localmente
 
 No necesita servidor, pero con uno se evitan las restricciones de `file://`:
