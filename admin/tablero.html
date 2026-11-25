@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tablero — Fiambrería 4 Quesos</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#1B1420">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+
+<body class="admin">
+
+  <div class="admin-barra">
+    <div class="contenedor">
+      <div class="admin-marca">4 Quesos <span>Tablero de indicadores</span></div>
+      <nav class="admin-nav">
+        <a href="panel.html">Catálogo</a>
+        <a href="tablero.html" aria-current="page">Tablero</a>
+        <a href="../index.html">Ver el sitio</a>
+      </nav>
+    </div>
+  </div>
+
+  <main class="admin-seccion">
+    <div class="contenedor">
+
+      <h1 style="font-size:var(--t-xl);margin:0 0 var(--e-2)">Salud del catálogo</h1>
+      <p class="ayuda" style="color:#6B6075;font-size:var(--t-s);margin:0 0 var(--e-5)">
+        Se calcula sobre los datos del sitio. Es igual en cualquier dispositivo
+        y está siempre completa.</p>
+
+      <div class="rejilla-kpi" id="kpis-catalogo"></div>
+
+      <div class="rejilla-graficos">
+        <div class="admin-tarjeta">
+          <h2>Productos por categoría</h2>
+          <p class="ayuda">Dónde está cargado el catálogo y dónde falta.</p>
+          <div class="grafico-scroll" id="g-categorias"></div>
+        </div>
+        <div class="admin-tarjeta">
+          <h2>Cobertura de fotos</h2>
+          <p class="ayuda">Un producto sin foto se ve con el recuadro gris.</p>
+          <div id="g-fotos"></div>
+          <div id="falta-foto"></div>
+        </div>
+      </div>
+
+      <div class="admin-tarjeta" id="caja-vacias" hidden>
+        <h2>Categorías sin ningún producto</h2>
+        <p class="ayuda">Estas aparecen en el menú y en la portada, pero al entrar
+           el cliente encuentra «Próximamente». Son las que más conviene cargar.</p>
+        <div id="lista-vacias"></div>
+      </div>
+
+      <h1 style="font-size:var(--t-xl);margin:var(--e-8) 0 var(--e-2)">Demanda</h1>
+      <div class="admin-aviso">
+        <p><strong>Esto mide este dispositivo, no todos los clientes.</strong>
+           Sin servidor, cada navegador guarda su propio registro: lo que ves acá
+           es lo que pasó en esta computadora. Para juntar lo de varios equipos,
+           exportá el registro en cada uno e importalo abajo.</p>
+      </div>
+
+      <div class="rejilla-kpi" id="kpis-demanda"></div>
+
+      <div class="rejilla-graficos">
+        <div class="admin-tarjeta">
+          <h2>Pedidos por día</h2>
+          <p class="ayuda">Últimos 30 días. Un pedido es un mensaje enviado a
+             WhatsApp: es intención de compra, no venta cobrada.</p>
+          <div class="grafico-scroll" id="g-dias"></div>
+        </div>
+        <div class="admin-tarjeta">
+          <h2>Horario de los pedidos</h2>
+          <p class="ayuda">A qué hora arman el pedido, en horas del día.</p>
+          <div class="grafico-scroll" id="g-horas"></div>
+        </div>
+      </div>
+
+      <div class="admin-tarjeta">
+        <h2>Productos más pedidos</h2>
+        <div id="g-productos"></div>
+      </div>
+
+      <div class="rejilla-graficos">
+        <div class="admin-tarjeta">
+          <h2>Búsquedas sin resultado</h2>
+          <p class="ayuda">Lo más accionable del tablero: alguien buscó esto y el
+             sitio no se lo pudo ofrecer. O falta cargarlo, o se llama distinto.</p>
+          <div id="t-busquedas"></div>
+        </div>
+        <div class="admin-tarjeta">
+          <h2>Reparto por sucursal</h2>
+          <p class="ayuda">Sucursal elegida en los pedidos enviados.</p>
+          <div id="g-sucursales"></div>
+        </div>
+      </div>
+
+      <div class="admin-tarjeta">
+        <h2>Registro de uso</h2>
+        <p class="ayuda">Para consolidar lo de varios dispositivos, o para empezar
+           de cero cuando termine una temporada.</p>
+        <div class="acciones">
+          <button class="btn btn-linea" id="btn-exportar">Exportar registro (.json)</button>
+          <label class="btn btn-linea" for="arch-importar" style="cursor:pointer">Importar registro</label>
+          <input type="file" id="arch-importar" accept=".json" hidden>
+          <button class="btn btn-linea" id="btn-borrar">Borrar todo el registro</button>
+        </div>
+        <div id="estado-registro"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <p class="pie-admin">Fiambrería 4 Quesos · Panel interno</p>
+
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/metricas.js"></script>
+  <script src="../assets/js/tablero.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    const $ = (id) => document.getElementById(id);
+    const T = FB.tablero;
+    const nf = T.nf;
+
+    const kpi = (cifra, rotulo, atencion) =>
+      `<div class="kpi${atencion ? ' atencion' : ''}">
+         <div class="cifra">${cifra}</div><div class="rotulo">${rotulo}</div></div>`;
+
+    const vacio = (texto) => `<p class="vacio-tablero">${texto}</p>`;
+
+    /* ---------------- salud del catálogo ---------------- */
+    function pintarCatalogo() {
+      const s = T.saludCatalogo();
+
+      $('kpis-catalogo').innerHTML = [
+        kpi(nf.format(s.total), 'productos cargados'),
+        kpi(`${s.categoriasConProductos}/${s.porCategoria.length}`, 'categorías con productos',
+            s.categoriasVacias.length > 0),
+        kpi(nf.format(s.sinFoto), 'sin foto', s.sinFoto > 0),
+        kpi(nf.format(s.enOferta), 'en oferta'),
+        kpi(FB.precio(s.precioProm), 'precio promedio de referencia')
+      ].join('');
+
+      const conProductos = s.porCategoria.filter((c) => c.veces > 0);
+      /* Horizontal y no vertical: "Panificados" o "Congelados" no
+         entran debajo de una barra de 26 px sin pisarse con la de al
+         lado. Con la etiqueta a la izquierda se leen enteras. */
+      $('g-categorias').innerHTML = conProductos.length
+        ? T.barrasHorizontales(conProductos, { titulo: 'Productos por categoría' })
+        : vacio('Todavía no hay productos cargados.');
+
+      const partes = [
+        { etiqueta: 'Con foto', veces: s.conFoto },
+        { etiqueta: 'Sin foto', veces: s.sinFoto }
+      ];
+      $('g-fotos').innerHTML = s.total
+        ? T.tiraSegmentada(partes) + T.leyenda(partes)
+        : vacio('Sin productos.');
+
+      $('falta-foto').innerHTML = s.sinFoto
+        ? `<p class="ayuda" style="margin-top:var(--e-4);color:#6B6075;font-size:var(--t-s)">
+             Faltan <strong>${s.sinFoto}</strong> fotos de ${s.total}. Las fotos relevadas
+             están en el anexo del acta: cargalas con la columna <code>img</code> del Excel.</p>`
+        : '';
+
+      if (s.categoriasVacias.length) {
+        $('caja-vacias').hidden = false;
+        $('lista-vacias').innerHTML =
+          `<div class="resumen-import">${s.categoriasVacias
+            .map((c) => `<span class="pastilla baja">${c.etiqueta}</span>`).join('')}</div>`;
+      }
+    }
+
+    /* ---------------- demanda ---------------- */
+    function pintarDemanda() {
+      const r = FB.metricas.resumen(30);
+
+      $('kpis-demanda').innerHTML = [
+        kpi(nf.format(r.pedidos), 'pedidos iniciados (30 días)'),
+        kpi(nf.format(r.unidadesPedidas), 'unidades pedidas'),
+        kpi(r.ticketPromedio ? FB.precio(r.ticketPromedio) : '—', 'ticket promedio'),
+        kpi(nf.format(r.busquedas), 'búsquedas'),
+        kpi(nf.format(r.sinResultado.length), 'términos sin resultado', r.sinResultado.length > 0)
+      ].join('');
+
+      const hayPedidos = r.pedidos > 0;
+
+      $('g-dias').innerHTML = hayPedidos
+        ? T.barrasVerticales(r.porDia.slice(-30).map((d) => ({ etiqueta: d.etiqueta, veces: d.veces })),
+            { titulo: 'Pedidos por día', anchoBarra: 12 })
+        : vacio('Todavía no se envió ningún pedido desde este dispositivo.');
+
+      $('g-horas').innerHTML = hayPedidos
+        ? T.barrasVerticales(r.porHora, { titulo: 'Pedidos por hora', anchoBarra: 12, color: T.colores.DORADO })
+        : vacio('Sin pedidos registrados.');
+
+      $('g-productos').innerHTML = r.productos.length
+        ? T.barrasHorizontales(
+            r.productos.slice(0, 10).map((p) => ({ etiqueta: T.nombreProducto(p.id), veces: p.veces })),
+            { titulo: 'Productos más pedidos' })
+        : vacio('Sin pedidos todavía. Armá un pedido de prueba en el sitio y volvé acá.');
+
+      $('t-busquedas').innerHTML = r.sinResultado.length
+        ? `<div class="tabla-scroll"><table class="admin-tabla">
+             <thead><tr><th>Buscaron</th><th>Veces</th></tr></thead>
+             <tbody>${r.sinResultado.slice(0, 15).map((b) =>
+               `<tr><td>${b.valor}</td><td>${nf.format(b.veces)}</td></tr>`).join('')}</tbody>
+           </table></div>`
+        : vacio('Ninguna búsqueda quedó sin resultado. Buena señal.');
+
+      $('g-sucursales').innerHTML = r.sucursales.length
+        ? T.tiraSegmentada(r.sucursales.map((s) => ({ etiqueta: s.valor, veces: s.veces }))) +
+          T.leyenda(r.sucursales.map((s) => ({ etiqueta: s.valor, veces: s.veces })))
+        : vacio('Sin pedidos para repartir.');
+
+      $('estado-registro').innerHTML =
+        `<p class="ayuda" style="margin-top:var(--e-4);color:#6B6075;font-size:var(--t-s)">
+           ${nf.format(r.totalEventos)} eventos guardados${
+             r.desde ? ' desde el ' + new Date(r.desde).toLocaleDateString('es-AR') : ''}.</p>`;
+    }
+
+    /* ---------------- registro ---------------- */
+    function bajar(texto, nombre, tipo) {
+      const url = URL.createObjectURL(new Blob([texto], { type: tipo }));
+      const a = document.createElement('a');
+      a.href = url; a.download = nombre;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    }
+
+    $('btn-exportar').addEventListener('click', () => {
+      const hoy = new Date().toISOString().slice(0, 10);
+      bajar(FB.metricas.exportar(), `registro-4quesos-${hoy}.json`, 'application/json');
+    });
+
+    $('arch-importar').addEventListener('change', (ev) => {
+      const f = ev.target.files[0];
+      if (!f) return;
+      const lector = new FileReader();
+      lector.onload = (e) => {
+        const r = FB.metricas.importar(e.target.result);
+        $('estado-registro').innerHTML = r.ok
+          ? `<p class="ayuda" style="margin-top:var(--e-4);color:#1E5233;font-size:var(--t-s)">
+               Importados ${r.agregados} eventos nuevos (${r.repetidos} ya estaban).</p>`
+          : `<p class="ayuda" style="margin-top:var(--e-4);color:#7A1C28;font-size:var(--t-s)">${r.error}</p>`;
+        if (r.ok) pintarDemanda();
+      };
+      lector.readAsText(f);
+      ev.target.value = '';
+    });
+
+    $('btn-borrar').addEventListener('click', () => {
+      if (!confirm('Se borra todo el registro de uso de este dispositivo. Esto no se puede deshacer. ¿Seguir?')) return;
+      FB.metricas.limpiar();
+      pintarDemanda();
+    });
+
+    pintarCatalogo();
+    pintarDemanda();
+  })();
+  </script>
+</body>
+</html>

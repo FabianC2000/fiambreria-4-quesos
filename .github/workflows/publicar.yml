@@ -26,15 +26,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # enablement: true deja Pages configurado para publicar desde este
-      # flujo de trabajo, sin tener que tocar el panel de Settings.
+      # El panel de administración queda versionado en el repositorio
+      # pero NO se publica. Es una pantalla sin autenticación real: en
+      # un sitio estático cualquier contraseña viaja en el código y se
+      # lee con botón derecho. Se usa en local, con XAMPP. Cuando haya
+      # un backend con login de verdad, se borra este paso.
+      - name: Armar lo que se publica, sin el panel
+        run: |
+          mkdir -p _publicar
+          rsync -a --exclude='.git' --exclude='.github' \
+                   --exclude='admin' --exclude='assets/js/vendor' \
+                   --exclude='_publicar' ./ _publicar/
+          echo "Se publican $(find _publicar -type f | wc -l) archivos."
+          test ! -d _publicar/admin || { echo "El panel se coló en la publicación"; exit 1; }
+
       - uses: actions/configure-pages@v5
         with:
           enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _publicar
 
       - id: despliegue
         uses: actions/deploy-pages@v4

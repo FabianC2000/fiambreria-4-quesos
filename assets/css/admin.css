@@ -1,0 +1,105 @@
+/* ============================================================
+   PANEL DE ADMINISTRACIÓN Y TABLERO
+
+   Hoja aparte de style.css a propósito: el sitio público no carga
+   nada de esto. Usa las mismas variables de color, tipografía y
+   espaciado, así que el panel se siente parte del mismo producto
+   sin que el visitante pague el peso.
+   ============================================================ */
+
+body.admin{background:var(--papel);min-height:100vh}
+
+/* ---------- barra superior ---------- */
+.admin-barra{
+  background:var(--tinta);color:#FDFBF7;
+  padding:var(--e-4) 0;position:sticky;top:0;z-index:40;
+}
+.admin-barra .contenedor{display:flex;align-items:center;gap:var(--e-5);flex-wrap:wrap}
+.admin-marca{font-family:var(--display);font-size:var(--t-m);font-weight:600;margin-right:auto}
+.admin-marca span{opacity:.6;font-family:var(--texto);font-size:var(--t-xs);display:block;font-weight:400}
+.admin-nav{display:flex;gap:var(--e-2);flex-wrap:wrap}
+.admin-nav a{
+  color:#FDFBF7;text-decoration:none;padding:var(--e-2) var(--e-4);
+  border-radius:var(--r-s);font-size:var(--t-s);
+  transition:background var(--rapido) var(--sale);
+}
+.admin-nav a:hover{background:rgba(255,255,255,.1)}
+.admin-nav a[aria-current]{background:var(--ciruela)}
+
+/* ---------- aviso de alcance ---------- */
+.admin-aviso{
+  background:#FFF6E3;border:1px solid #E9D39A;border-radius:var(--r);
+  padding:var(--e-4) var(--e-5);margin-bottom:var(--e-6);
+  font-size:var(--t-s);color:#5C4A1F;
+}
+.admin-aviso strong{color:#3F3313}
+.admin-aviso p{margin:0}
+.admin-aviso p + p{margin-top:var(--e-2)}
+
+/* ---------- bloques ---------- */
+.admin-seccion{padding:var(--e-7) 0 var(--e-6)}
+.admin-tarjeta{
+  background:#fff;border:1px solid #E8E1D8;border-radius:var(--r);
+  padding:var(--e-5);margin-bottom:var(--e-5);
+}
+.admin-tarjeta > h2{font-size:var(--t-m);margin:0 0 var(--e-2)}
+.admin-tarjeta > p.ayuda{color:#6B6075;font-size:var(--t-s);margin:0 0 var(--e-4)}
+
+/* ---------- zona de archivo ---------- */
+.soltar{
+  border:2px dashed #D8CEC0;border-radius:var(--r);
+  padding:var(--e-7) var(--e-5);text-align:center;cursor:pointer;
+  transition:border-color var(--rapido) var(--sale),background var(--rapido) var(--sale);
+}
+.soltar:hover,.soltar.encima{border-color:var(--ciruela);background:#FAF6FB}
+.soltar p{margin:var(--e-2) 0 0;color:#6B6075;font-size:var(--t-s)}
+.soltar strong{color:var(--ciruela);font-size:var(--t-m)}
+.soltar input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+
+/* ---------- resultados de validación ---------- */
+.resumen-import{display:flex;gap:var(--e-3);flex-wrap:wrap;margin-bottom:var(--e-4)}
+.pastilla{
+  display:inline-flex;align-items:baseline;gap:var(--e-2);
+  padding:var(--e-2) var(--e-4);border-radius:999px;font-size:var(--t-s);
+  background:#F2EDE6;color:#3F3550;
+}
+.pastilla b{font-size:var(--t-m)}
+.pastilla.alta{background:#E8F3EC;color:#1E5233}
+.pastilla.cambio{background:#FFF1D9;color:#6B4C10}
+.pastilla.error{background:#FBE9EB;color:#7A1C28}
+.pastilla.baja{background:#F0EDF4;color:#4A2E56}
+
+table.admin-tabla{width:100%;border-collapse:collapse;font-size:var(--t-s)}
+table.admin-tabla th,table.admin-tabla td{
+  text-align:left;padding:var(--e-2) var(--e-3);border-bottom:1px solid #EFE9E0;vertical-align:top;
+}
+table.admin-tabla th{font-size:var(--t-xs);text-transform:uppercase;letter-spacing:.04em;color:#6B6075}
+table.admin-tabla tbody tr:last-child td{border-bottom:0}
+.tabla-scroll{max-height:380px;overflow:auto;border:1px solid #EFE9E0;border-radius:var(--r-s)}
+.antes{color:#9C93A6;text-decoration:line-through}
+.ahora{color:#1E5233;font-weight:600}
+
+/* ---------- indicadores ---------- */
+.rejilla-kpi{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+  gap:var(--e-4);margin-bottom:var(--e-5);
+}
+.kpi{background:#fff;border:1px solid #E8E1D8;border-radius:var(--r);padding:var(--e-4) var(--e-5)}
+.kpi .cifra{font-family:var(--display);font-size:34px;line-height:1.05;color:var(--ciruela)}
+.kpi .rotulo{font-size:var(--t-xs);color:#6B6075;margin-top:var(--e-1)}
+.kpi.atencion .cifra{color:#C0485A}
+
+.rejilla-graficos{display:grid;grid-template-columns:1fr 1fr;gap:var(--e-5)}
+@media (max-width:900px){.rejilla-graficos{grid-template-columns:1fr}}
+.grafico{width:100%;height:auto;display:block;overflow:visible}
+.grafico-scroll{overflow-x:auto}
+
+.leyenda{list-style:none;display:flex;gap:var(--e-5);flex-wrap:wrap;margin:var(--e-3) 0 0;padding:0;font-size:var(--t-s)}
+.leyenda .punto{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+
+.vacio-tablero{color:#6B6075;font-size:var(--t-s);padding:var(--e-5);text-align:center;
+  border:1px dashed #D8CEC0;border-radius:var(--r-s)}
+
+.acciones{display:flex;gap:var(--e-3);flex-wrap:wrap;margin-top:var(--e-5)}
+.admin-tarjeta .btn[disabled]{opacity:.45;pointer-events:none}
+.pie-admin{padding:var(--e-6) 0;color:#9C93A6;font-size:var(--t-xs);text-align:center}

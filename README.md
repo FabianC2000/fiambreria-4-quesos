@@ -38,6 +38,35 @@ página, y `horarios`, los mismos datos en números. Con el segundo el sitio cal
 solo si el local está abierto, usando la hora de Jujuy y no el reloj del visitante.
 **Si cambian los horarios hay que tocar los dos.**
 
+## Panel de administración y tablero
+
+En `/admin/` hay dos pantallas internas:
+
+- **`admin/panel.html`** — importa el catálogo desde un Excel. Descargás la
+  plantilla (viene con todos los productos actuales y una hoja con los valores
+  que acepta cada columna), editás los precios, la subís y el panel te muestra
+  qué cambia antes de aplicar nada: altas, modificaciones campo por campo, y qué
+  productos dejarían de figurar. Si hay un error de carga no deja seguir.
+  Al confirmar genera un `productos.js` actualizado para que reemplaces el que
+  está en `assets/js/`.
+
+- **`admin/tablero.html`** — indicadores. La mitad de arriba es la salud del
+  catálogo (cuántos productos, cuáles sin foto, qué categorías están vacías) y
+  se calcula sobre los datos del sitio. La mitad de abajo es la demanda
+  (pedidos, búsquedas sin resultado, reparto por sucursal) y sale del registro
+  de uso del navegador.
+
+**Estas dos pantallas no se publican en internet y el flujo de GitHub Pages las
+excluye a propósito.** No tienen autenticación y no pueden tenerla: en un sitio
+estático cualquier contraseña viaja dentro del código. Se usan en local, con
+XAMPP. El día que haya un backend con login de verdad, se saca la exclusión del
+archivo `.github/workflows/publicar.yml`.
+
+El registro de uso vive en el navegador de cada dispositivo, así que el tablero
+muestra lo de esa máquina y no la suma de todos los clientes. El propio tablero
+lo aclara en pantalla y permite exportar e importar el registro para consolidar
+varios equipos a mano.
+
 ## Ejecutarlo localmente
 
 No necesita servidor, pero con uno se evitan las restricciones de `file://`:

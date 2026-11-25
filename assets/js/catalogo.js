@@ -355,6 +355,11 @@ FB.catalogo = (function () {
       const porRubros = !texto && !sub && cat === 'todas';
 
       let r;
+      /* Una categoría elegida a mano cuenta como visita; el estado
+         inicial "todas" no, porque no dice nada sobre el interés. */
+      if (FB.metricas && !texto && cat && cat !== 'todas') {
+        FB.metricas.registrar('categoria', { c: cat });
+      }
       if (texto)    r = FB.buscar(texto);
       else if (sub) r = FB.porSub(cat, sub);
       else          r = FB.porCategoria(cat);

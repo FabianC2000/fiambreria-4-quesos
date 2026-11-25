@@ -232,7 +232,17 @@ FB.carrito = (function () {
     texto += `\nRetiro en: ${sucursal.nombre} (${sucursal.direccion})`;
     if (usuario) texto += `\nA nombre de: ${usuario.nombre}`;
 
-    /* Cambiá este número por el del local (formato internacional, sin + ni espacios) */
+    /* Queda anotado antes de abrir WhatsApp: una vez que el foco se
+       va a otra pestaña no hay garantía de que este código siga
+       corriendo. El tablero cuenta pedidos iniciados, no cobrados. */
+    if (FB.metricas) {
+      FB.metricas.registrar('pedido', {
+        items: items.map((it) => ({ id: it.id, op: it.opcion, cant: it.cantidad })),
+        total: total(),
+        suc: FB.nombreCorto ? FB.nombreCorto(sucursal.nombre) : sucursal.nombre
+      });
+    }
+
     /* El número vive en FB.empresa, en productos.js */
     const numero = FB.empresa.whatsapp;
     window.open(`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`, '_blank');

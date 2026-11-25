@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel — Fiambrería 4 Quesos</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#1B1420">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+
+<body class="admin">
+
+  <div class="admin-barra">
+    <div class="contenedor">
+      <div class="admin-marca">4 Quesos <span>Panel de administración</span></div>
+      <nav class="admin-nav">
+        <a href="panel.html" aria-current="page">Catálogo</a>
+        <a href="tablero.html">Tablero</a>
+        <a href="../index.html">Ver el sitio</a>
+      </nav>
+    </div>
+  </div>
+
+  <main class="admin-seccion">
+    <div class="contenedor">
+
+      <div class="admin-aviso">
+        <p><strong>Esta pantalla no tiene contraseña y no puede tenerla.</strong>
+           El sitio es estático: cualquier clave escrita acá viajaría dentro del
+           código y se lee con botón derecho. Mientras no haya un servidor,
+           la carpeta <code>/admin/</code> no debería publicarse en internet;
+           usala desde tu computadora con XAMPP.</p>
+        <p>El panel tampoco guarda nada por su cuenta: arma el archivo
+           <code>productos.js</code> actualizado y vos lo reemplazás. Nada cambia
+           en el sitio hasta que subas ese archivo.</p>
+      </div>
+
+      <section class="admin-tarjeta">
+        <h2>1. Descargá la plantilla</h2>
+        <p class="ayuda">Trae tu catálogo actual ya cargado y una segunda hoja con
+           los valores que acepta cada columna. Editá los precios ahí mismo y
+           guardalo; no hace falta armar nada desde cero.</p>
+        <button class="btn btn-linea" id="btn-plantilla">Descargar plantilla .xlsx</button>
+      </section>
+
+      <section class="admin-tarjeta">
+        <h2>2. Subí el Excel</h2>
+        <p class="ayuda">Se lee en tu navegador. El archivo no se envía a ningún lado.</p>
+        <label class="soltar" id="zona">
+          <input type="file" id="archivo" accept=".xlsx,.xlsm,.csv">
+          <strong>Elegí el archivo o arrastralo acá</strong>
+          <p>.xlsx, .xlsm o .csv</p>
+        </label>
+        <div id="estado-lectura"></div>
+      </section>
+
+      <section class="admin-tarjeta" id="caja-resultado" hidden>
+        <h2>3. Revisá antes de aplicar</h2>
+        <p class="ayuda">Esto todavía no toca el sitio. Mirá que los cambios sean
+           los que esperabas.</p>
+        <div class="resumen-import" id="resumen"></div>
+        <div id="detalle"></div>
+        <div class="acciones">
+          <button class="btn btn-ciruela" id="btn-generar" disabled>Descargar productos.js actualizado</button>
+          <button class="btn btn-linea" id="btn-cancelar">Descartar</button>
+        </div>
+        <p class="ayuda" style="margin-top:var(--e-4)">
+          Después de descargarlo: reemplazá <code>assets/js/productos.js</code> en tu
+          carpeta y, si querés que se vea en internet, subí ese archivo al
+          repositorio. El sitio se republica solo en un par de minutos.</p>
+      </section>
+
+    </div>
+  </main>
+
+  <p class="pie-admin">Fiambrería 4 Quesos · Panel interno</p>
+
+  <script src="../assets/js/vendor/xlsx.mini.min.js"></script>
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/importador.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    const $ = (id) => document.getElementById(id);
+    const I = FB.importador;
+    let listoParaGenerar = null;
+
+    /* ---------- plantilla ---------- */
+    $('btn-plantilla').addEventListener('click', () => {
+      const libro = I.plantilla();
+      const datos = XLSX.write(libro, { type: 'array', bookType: 'xlsx' });
+      descargar(new Blob([datos], { type: 'application/octet-stream' }),
+                'catalogo-4quesos.xlsx');
+    });
+
+    function descargar(blob, nombre) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = nombre;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    }
+
+    /* ---------- lectura del archivo ---------- */
+    const zona = $('zona');
+    ['dragenter', 'dragover'].forEach((e) => zona.addEventListener(e, (ev) => {
+      ev.preventDefault(); zona.classList.add('encima');
+    }));
+    ['dragleave', 'drop'].forEach((e) => zona.addEventListener(e, () => zona.classList.remove('encima')));
+    zona.addEventListener('drop', (ev) => {
+      ev.preventDefault();
+      if (ev.dataTransfer.files[0]) leer(ev.dataTransfer.files[0]);
+    });
+    $('archivo').addEventListener('change', (ev) => {
+      if (ev.target.files[0]) leer(ev.target.files[0]);
+    });
+
+    function leer(archivo) {
+      $('estado-lectura').innerHTML = `<p class="ayuda" style="margin-top:var(--e-3)">Leyendo ${archivo.name}…</p>`;
+      const lector = new FileReader();
+      lector.onerror = () => aviso('No pude leer el archivo.', true);
+      lector.onload = (e) => {
+        try {
+          const libro = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+          const hoja = libro.Sheets[libro.SheetNames[0]];
+          const filas = XLSX.utils.sheet_to_json(hoja, { defval: '' });
+          if (!filas.length) return aviso('La primera hoja está vacía.', true);
+          procesar(filas, archivo.name);
+        } catch (err) {
+          aviso('No pude abrir el archivo: ' + err.message, true);
+        }
+      };
+      lector.readAsArrayBuffer(archivo);
+    }
+
+    const aviso = (texto, malo) =>
+      $('estado-lectura').innerHTML =
+        `<p class="ayuda" style="margin-top:var(--e-3);color:${malo ? '#7A1C28' : '#1E5233'}">${texto}</p>`;
+
+    /* ---------- validación y comparación ---------- */
+    function procesar(filas, nombreArchivo) {
+      const mapa = I.mapearColumnas(Object.keys(filas[0]));
+      const { productos, errores, avisos } = I.validar(filas, mapa);
+
+      aviso(`${nombreArchivo}: ${filas.length} filas leídas.`);
+
+      if (errores.length) {
+        listoParaGenerar = null;
+        $('btn-generar').disabled = true;
+        mostrar({ errores, avisos, filas: filas.length });
+        return;
+      }
+
+      I.asignarIds(productos);
+      const d = I.comparar(productos);
+      listoParaGenerar = productos;
+      $('btn-generar').disabled = false;
+      mostrar({ errores, avisos, filas: filas.length, dif: d, productos });
+    }
+
+    function mostrar({ errores, avisos, filas, dif, productos }) {
+      $('caja-resultado').hidden = false;
+
+      const p = [];
+      p.push(`<span class="pastilla">Filas <b>${filas}</b></span>`);
+      if (errores.length) p.push(`<span class="pastilla error">Errores <b>${errores.length}</b></span>`);
+      if (dif) {
+        p.push(`<span class="pastilla alta">Altas <b>${dif.altas.length}</b></span>`);
+        p.push(`<span class="pastilla cambio">Modificados <b>${dif.cambios.length}</b></span>`);
+        p.push(`<span class="pastilla">Sin cambios <b>${dif.iguales.length}</b></span>`);
+        if (dif.ausentes.length) p.push(`<span class="pastilla baja">Ya no figuran <b>${dif.ausentes.length}</b></span>`);
+      }
+      if (avisos.length) p.push(`<span class="pastilla cambio">Avisos <b>${avisos.length}</b></span>`);
+      $('resumen').innerHTML = p.join('');
+
+      let html = '';
+
+      if (errores.length) {
+        html += bloque('Errores que hay que corregir en el Excel',
+          tabla(['Fila', 'Columna', 'Qué pasa'],
+                errores.map((e) => [e.fila, e.campo, e.mensaje])));
+        html += `<p class="ayuda">Mientras haya errores no se genera el archivo:
+                 una fila mal cargada rompe el catálogo entero del sitio.</p>`;
+      }
+
+      if (dif) {
+        if (dif.cambios.length) {
+          html += bloque(`Cambios en ${dif.cambios.length} producto(s)`,
+            tabla(['Producto', 'Campo', 'Antes', 'Ahora'],
+              dif.cambios.flatMap((c) => c.difs.map((d, i) => [
+                i === 0 ? `<strong>${c.previo.nombre}</strong>` : '',
+                d.campo, `<span class="antes">${d.antes}</span>`, `<span class="ahora">${d.ahora}</span>`
+              ]))));
+        }
+        if (dif.altas.length) {
+          html += bloque(`${dif.altas.length} producto(s) nuevo(s)`,
+            tabla(['Código', 'Nombre', 'Categoría', 'Precio base'],
+              dif.altas.map((a) => [a.id, a.nombre, a.categoria,
+                FB.precio(a.tipo === 'fiambre' ? a.precios.g100 : a.precios.u1)])));
+        }
+        if (dif.ausentes.length) {
+          html += bloque(`${dif.ausentes.length} producto(s) que están hoy y no vienen en el Excel`,
+            tabla(['Código', 'Nombre'], dif.ausentes.map((a) => [a.id, a.nombre])) +
+            `<p class="ayuda">Si aplicás la importación, estos dejan de verse en el sitio.
+             Si no querías darlos de baja, agregalos al Excel y volvé a subirlo.</p>`);
+        }
+      }
+
+      if (avisos.length) {
+        html += bloque('Avisos (no impiden importar)',
+          tabla(['Fila', 'Columna', 'Detalle'], avisos.map((a) => [a.fila, a.campo, a.mensaje])));
+      }
+
+      $('detalle').innerHTML = html;
+    }
+
+    const bloque = (titulo, contenido) =>
+      `<h3 style="font-size:var(--t-s);text-transform:uppercase;letter-spacing:.04em;
+                  color:#6B6075;margin:var(--e-5) 0 var(--e-2)">${titulo}</h3>${contenido}`;
+
+    const tabla = (cabeceras, filas) => `<div class="tabla-scroll"><table class="admin-tabla">
+      <thead><tr>${cabeceras.map((c) => `<th>${c}</th>`).join('')}</tr></thead>
+      <tbody>${filas.map((f) => `<tr>${f.map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table></div>`;
+
+    /* ---------- generación del archivo ---------- */
+    $('btn-generar').addEventListener('click', async () => {
+      if (!listoParaGenerar) return;
+      const boton = $('btn-generar');
+      boton.disabled = true; boton.textContent = 'Generando…';
+      try {
+        /* Se parte del productos.js real, no de una plantilla: así se
+           conservan los datos de la empresa, las categorías, las
+           sucursales y los horarios tal como están. */
+        const resp = await fetch('../assets/js/productos.js', { cache: 'no-store' });
+        if (!resp.ok) throw new Error('no pude leer productos.js (' + resp.status + ')');
+        const texto = await resp.text();
+        const nuevo = I.generarArchivo(texto, listoParaGenerar);
+        descargar(new Blob([nuevo], { type: 'text/javascript;charset=utf-8' }), 'productos.js');
+        aviso(`Listo: productos.js con ${listoParaGenerar.length} productos. Reemplazá el archivo en assets/js/.`);
+      } catch (err) {
+        aviso('No pude generar el archivo: ' + err.message, true);
+      } finally {
+        boton.disabled = false; boton.textContent = 'Descargar productos.js actualizado';
+      }
+    });
+
+    $('btn-cancelar').addEventListener('click', () => {
+      listoParaGenerar = null;
+      $('caja-resultado').hidden = true;
+      $('archivo').value = '';
+      $('estado-lectura').innerHTML = '';
+    });
+  })();
+  </script>
+</body>
+</html>

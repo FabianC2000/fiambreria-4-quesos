@@ -304,6 +304,10 @@ FB.contarSub = (catId, subId) => FB.porSub(catId, subId).length;
    tipo: 'fiambre' (100 g / media barra / kg) o 'unidad'
    img:  nombre del archivo dentro de assets/imagenes/productos/
    ------------------------------------------------------------ */
+/* === INICIO CATALOGO — no borres esta línea ===
+   El panel de administración reemplaza todo lo que hay entre esta
+   marca y la de cierre cuando importás un Excel. Si las borrás, el
+   importador no sabe dónde escribir y te lo va a avisar. */
 FB.productos = [
   { id:'p01', nombre:'Jamón cocido natural', marca:'Paladini', categoria:'fiambres', sub:'jamones', tipo:'fiambre',
     img:null, /* subí la foto y poné aquí: 'jamon-cocido.jpg' */ destacado:true, etiqueta:'Más vendido',
@@ -417,6 +421,7 @@ FB.productos = [
     img:null, /* subí la foto y poné aquí: 'milanesas.jpg' */
     precios:{ u1:8900, u2:17000, u6:48900 } }
 ];
+/* === FIN CATALOGO === */
 
 /* Búsquedas y filtros */
 /* Sin tildes y en minúscula de los dos lados: nadie escribe

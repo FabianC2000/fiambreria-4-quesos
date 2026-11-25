@@ -454,12 +454,27 @@
     const campo = document.getElementById('campo-buscar');
     const caja  = document.getElementById('sugerencias');
 
+    /* La búsqueda se registra recién cuando la persona deja de
+       escribir. Si no, "jamon" entraría al tablero como j, ja, jam,
+       jamo y jamon, y la lista de búsquedas sin resultado quedaría
+       inflada por términos a medio tipear. */
+    let temporizadorBusqueda = null;
+    function anotarBusqueda(texto, cantidad) {
+      if (!FB.metricas) return;
+      clearTimeout(temporizadorBusqueda);
+      temporizadorBusqueda = setTimeout(() => {
+        FB.metricas.registrar('busqueda', { q: texto.toLowerCase(), n: cantidad });
+      }, 900);
+    }
+
     if (campo && caja) {
       campo.addEventListener('input', () => {
         const t = campo.value.trim();
         if (t.length < 2) { caja.classList.remove('abierto'); return; }
 
-        const r = FB.buscar(t).slice(0, 6);
+        const encontrados = FB.buscar(t);
+        anotarBusqueda(t, encontrados.length);
+        const r = encontrados.slice(0, 6);
         if (!r.length) {
           caja.innerHTML = `<div class="sugerencias-vacio">No encontramos “${t}”. Probá con otra palabra.</div>`;
         } else {
