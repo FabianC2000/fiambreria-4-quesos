@@ -90,8 +90,15 @@ CREATE TABLE productos (
   actualizado  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_producto_categoria FOREIGN KEY (categoria_id)
     REFERENCES categorias (id) ON UPDATE CASCADE,
+  -- RESTRICT y no SET NULL: MySQL exige que todas las columnas de
+  -- una clave foránea con SET NULL admitan NULL, y categoria_id no
+  -- puede admitirlo (un producto sin categoría no existe). Con
+  -- RESTRICT, borrar una subcategoría que todavía tiene productos
+  -- falla en voz alta en lugar de dejarlos sueltos: primero hay que
+  -- reasignarlos. Un producto con sub_id NULL no queda alcanzado,
+  -- porque una clave foránea con un NULL se da por satisfecha.
   CONSTRAINT fk_producto_sub FOREIGN KEY (categoria_id, sub_id)
-    REFERENCES subcategorias (categoria_id, id) ON DELETE SET NULL ON UPDATE CASCADE,
+    REFERENCES subcategorias (categoria_id, id) ON DELETE RESTRICT ON UPDATE CASCADE,
   KEY idx_productos_categoria (categoria_id, activo),
   KEY idx_productos_oferta (antes),
   KEY idx_productos_destacado (destacado),
@@ -168,4 +175,9 @@ FROM productos p
 JOIN categorias c ON c.id = p.categoria_id
 LEFT JOIN precios pr ON pr.producto_id = p.id
 WHERE p.activo = 1
-GROUP BY p.id;
+-- Se agrupa también por c.nombre: con ONLY_FULL_GROUP_BY activo
+-- (predeterminado en MySQL 8) agrupar solo por p.id obliga al motor
+-- a deducir que c.nombre depende funcionalmente de p.id a través del
+-- JOIN. Lo deduce, pero no en todas las versiones; nombrarlo cuesta
+-- nada y saca la duda.
+GROUP BY p.id, c.nombre;
