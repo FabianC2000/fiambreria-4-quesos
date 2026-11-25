@@ -1,0 +1,89 @@
+/* ============================================================
+   PANTALLAS DE CUENTA — registro e ingreso
+   Usa las mismas variables que el resto del sitio.
+   ============================================================ */
+
+.cuenta-marco{
+  max-width:470px;margin:0 auto;padding:var(--e-8) var(--e-4) var(--e-9);
+}
+.cuenta-marco h1{
+  font-family:var(--display);font-size:var(--t-xl);margin:0 0 var(--e-2);
+}
+.cuenta-marco .entrada{color:#6B6075;font-size:var(--t-s);margin:0 0 var(--e-6)}
+
+.campo{margin-bottom:var(--e-5)}
+.campo label{
+  display:block;font-size:var(--t-s);font-weight:600;
+  color:var(--ciruela);margin-bottom:var(--e-2);
+}
+.campo .pista{display:block;font-weight:400;color:#6B6075;font-size:var(--t-xs);margin-top:2px}
+.campo input{
+  width:100%;padding:var(--e-3) var(--e-4);font:inherit;font-size:var(--t-s);
+  color:var(--tinta);background:#fff;
+  border:1px solid #D8CEC0;border-radius:var(--r-s);
+  transition:border-color var(--rapido) var(--sale);
+}
+.campo input:hover{border-color:#B9AC9A}
+.campo input:focus-visible{
+  outline:2px solid var(--ciruela);outline-offset:1px;border-color:var(--ciruela);
+}
+.campo input[aria-invalid="true"]{border-color:#C0485A}
+.campo .error{
+  display:block;color:#A3263A;font-size:var(--t-xs);margin-top:var(--e-2);
+}
+/* Las dos columnas alinean sus inputs abajo: si una etiqueta tiene
+   una línea de ayuda y la otra no, sin esto los campos quedan a
+   distinta altura y se nota enseguida. */
+.campo-doble{display:grid;grid-template-columns:1fr 1fr;gap:var(--e-4);align-items:end}
+.campo-doble .campo{display:flex;flex-direction:column;margin-bottom:0}
+.campo-doble .campo input{margin-top:auto}
+.campo-doble + .campo{margin-top:var(--e-5)}
+@media (max-width:520px){.campo-doble{grid-template-columns:1fr}}
+
+/* ---------- consentimientos ----------
+   Separados del resto y entre sí: uno es obligatorio y el otro no,
+   y eso tiene que notarse antes de tildar, no después. */
+.consentimientos{
+  border:1px solid #E4DCD1;border-radius:var(--r);
+  padding:var(--e-4) var(--e-5);margin-bottom:var(--e-5);background:#FAF7F2;
+}
+.consentimiento{display:flex;gap:var(--e-3);align-items:flex-start}
+.consentimiento + .consentimiento{
+  margin-top:var(--e-4);padding-top:var(--e-4);border-top:1px solid #EFE9E0;
+}
+.consentimiento input[type=checkbox]{
+  flex:0 0 auto;width:18px;height:18px;margin-top:2px;accent-color:var(--ciruela);cursor:pointer;
+}
+.consentimiento input[type=checkbox]:focus-visible{outline:2px solid var(--ciruela);outline-offset:2px}
+.consentimiento label{font-size:var(--t-s);line-height:1.5;color:var(--tinta);cursor:pointer}
+.consentimiento .detalle{display:block;color:#6B6075;font-size:var(--t-xs);margin-top:3px}
+.consentimiento a{color:var(--ciruela)}
+.marca-opcional{
+  display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;
+  background:#EDE7F2;color:var(--ciruela);padding:1px 7px;border-radius:999px;
+  margin-left:var(--e-2);vertical-align:1px;
+}
+
+.cuenta-marco .btn{width:100%;justify-content:center}
+.pie-cuenta{
+  text-align:center;margin-top:var(--e-6);font-size:var(--t-s);color:#6B6075;
+}
+.pie-cuenta a{color:var(--ciruela)}
+
+/* ---------- avisos ---------- */
+.aviso{
+  border-radius:var(--r-s);padding:var(--e-4);margin-bottom:var(--e-5);font-size:var(--t-s);
+}
+.aviso-mal{background:#FBE9EB;color:#7A1C28;border:1px solid #F0CDD2}
+.aviso-bien{background:#E8F3EC;color:#1E5233;border:1px solid #BFE0CB}
+.aviso a{color:inherit;font-weight:600}
+.aviso p{margin:0}
+.aviso p + p{margin-top:var(--e-2)}
+
+/* Medidor simple de la contraseña: acompaña al texto, no lo reemplaza. */
+.fuerza{display:flex;gap:4px;margin-top:var(--e-2)}
+.fuerza span{flex:1;height:4px;border-radius:2px;background:#E4DCD1;transition:background var(--rapido) var(--sale)}
+.fuerza[data-nivel="1"] span:nth-child(1){background:#C0485A}
+.fuerza[data-nivel="2"] span:nth-child(-n+2){background:#E0A030}
+.fuerza[data-nivel="3"] span:nth-child(-n+3){background:#6E9B74}
+.fuerza[data-nivel="4"] span{background:#3F7D50}

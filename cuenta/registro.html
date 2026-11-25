@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crear cuenta — Fiambrería 4 Quesos</title>
+  <meta name="description" content="Creá tu cuenta en Fiambrería 4 Quesos para armar tus pedidos más rápido.">
+  <meta name="theme-color" content="#1B1420">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/cuenta.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+
+<body data-pagina="cuenta">
+  <div id="sitio-header"></div>
+
+  <main class="cuenta-marco">
+    <h1>Crear cuenta</h1>
+    <p class="entrada">Para armar tus pedidos más rápido y que queden guardados.
+       No hace falta cuenta para comprar: podés seguir pidiendo como siempre.</p>
+
+    <div id="aviso" hidden></div>
+
+    <form id="form-registro" novalidate>
+      <div class="campo-doble">
+        <div class="campo">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" name="nombre" type="text" autocomplete="given-name" required maxlength="80">
+          <span class="error" id="e-nombre" hidden></span>
+        </div>
+        <div class="campo">
+          <label for="apellido">Apellido <span class="pista">Opcional</span></label>
+          <input id="apellido" name="apellido" type="text" autocomplete="family-name" maxlength="80">
+          <span class="error" id="e-apellido" hidden></span>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="correo">Correo electrónico</label>
+        <input id="correo" name="correo" type="email" autocomplete="email" required maxlength="190">
+        <span class="error" id="e-correo" hidden></span>
+      </div>
+
+      <div class="campo">
+        <label for="telefono">Teléfono
+          <span class="pista">Opcional. Sirve para avisarte si algo de tu pedido no está.</span></label>
+        <input id="telefono" name="telefono" type="tel" autocomplete="tel" maxlength="40">
+        <span class="error" id="e-telefono" hidden></span>
+      </div>
+
+      <div class="campo">
+        <label for="clave">Contraseña <span class="pista">Mínimo 8 caracteres.</span></label>
+        <input id="clave" name="clave" type="password" autocomplete="new-password" required minlength="8">
+        <div class="fuerza" id="fuerza" data-nivel="0" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <span class="error" id="e-clave" hidden></span>
+      </div>
+
+      <!-- Los dos consentimientos van separados y ninguno viene
+           tildado. El de ofertas, además, dice que es opcional: una
+           casilla marcada de antemano no es consentimiento. -->
+      <div class="consentimientos">
+        <div class="consentimiento">
+          <input type="checkbox" id="terminos" name="terminos">
+          <label for="terminos">
+            Acepto los <a href="../terminos/terminos.html" target="_blank" rel="noopener">términos y condiciones</a>
+            y la <a href="../politicas/politicas.html" target="_blank" rel="noopener">política de privacidad</a>.
+            <span class="detalle">Necesario para crear la cuenta.</span>
+          </label>
+        </div>
+
+        <div class="consentimiento">
+          <input type="checkbox" id="ofertas" name="ofertas">
+          <label for="ofertas">
+            Quiero recibir las ofertas por correo <span class="marca-opcional">Opcional</span>
+            <span class="detalle">Podés darte de baja cuando quieras, desde cualquiera de esos correos.
+              Si no la tildás, solo te escribimos por cosas de tu cuenta.</span>
+          </label>
+        </div>
+      </div>
+
+      <button class="btn btn-ciruela" type="submit" id="btn-crear">Crear cuenta</button>
+    </form>
+
+    <p class="pie-cuenta">¿Ya tenés cuenta? <a href="ingresar.html">Iniciá sesión</a></p>
+  </main>
+
+  <div id="sitio-footer"></div>
+
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/metricas.js"></script>
+  <script src="../assets/js/carrito.js"></script>
+  <script src="../assets/js/usuarios.js"></script>
+  <script src="../assets/js/header.js"></script>
+  <script src="../assets/js/cuenta.js"></script>
+  <script>FB.cuenta.registro();</script>
+</body>
+</html>

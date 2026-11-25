@@ -27,4 +27,13 @@ return [
        pantalla. En el hosting va en false, o un error de SQL le
        cuenta a cualquiera cómo se llaman tus tablas. */
     'depurar' => true,
+
+    /* Dirección desde la que se sirve el sitio. Se usa para armar
+       los enlaces que van por correo, que tienen que ser absolutos.
+       En el hosting: https://tudominio.com.ar */
+    'url_base' => 'http://localhost/fiambreria',
+
+    /* 'archivo' guarda los correos en almacen/correos/ para poder
+       probar sin servidor de correo. 'smtp' los manda de verdad. */
+    'correo_modo' => 'archivo',
 ];

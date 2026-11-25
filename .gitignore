@@ -7,3 +7,6 @@ assets/js/productos.js.bak
 # Basura del sistema
 Thumbs.db
 .DS_Store
+
+# Correos simulados del modo desarrollo
+almacen/

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iniciar sesión — Fiambrería 4 Quesos</title>
+  <meta name="description" content="Entrá a tu cuenta de Fiambrería 4 Quesos.">
+  <meta name="theme-color" content="#1B1420">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/cuenta.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+
+<body data-pagina="cuenta">
+  <div id="sitio-header"></div>
+
+  <main class="cuenta-marco">
+    <h1>Iniciar sesión</h1>
+    <p class="entrada">Entrá para ver tus pedidos y tener tus datos cargados.</p>
+
+    <div id="aviso" hidden></div>
+
+    <form id="form-ingreso" novalidate>
+      <div class="campo">
+        <label for="correo">Correo electrónico</label>
+        <input id="correo" name="correo" type="email" autocomplete="email" required maxlength="190">
+      </div>
+
+      <div class="campo">
+        <label for="clave">Contraseña</label>
+        <input id="clave" name="clave" type="password" autocomplete="current-password" required>
+      </div>
+
+      <button class="btn btn-ciruela" type="submit" id="btn-entrar">Entrar</button>
+    </form>
+
+    <p class="pie-cuenta">¿Todavía no tenés cuenta? <a href="registro.html">Creala acá</a></p>
+  </main>
+
+  <div id="sitio-footer"></div>
+
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/metricas.js"></script>
+  <script src="../assets/js/carrito.js"></script>
+  <script src="../assets/js/usuarios.js"></script>
+  <script src="../assets/js/header.js"></script>
+  <script src="../assets/js/cuenta.js"></script>
+  <script>FB.cuenta.ingreso();</script>
+</body>
+</html>

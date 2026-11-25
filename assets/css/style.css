@@ -1452,3 +1452,31 @@ ul{list-style:none}
   .tarjeta-categoria:hover .cat-figura svg,
   .tarjeta-categoria:hover .cat-figura img{transform:none}
 }
+
+/* ---------- menú del botón de usuario ----------
+   Va acá y no en cuenta.css: el botón está en el encabezado de
+   todas las páginas, y cuenta.css solo lo cargan registro e
+   ingreso. */
+.menu-usuario{
+  position:absolute;z-index:60;min-width:230px;
+  background:#fff;border:1px solid #E4DCD1;border-radius:var(--r);
+  box-shadow:0 10px 26px rgba(26,22,37,.16);
+  padding:var(--e-3);
+}
+.menu-usuario-quien{
+  margin:0 0 var(--e-3);padding:0 var(--e-2) var(--e-3);
+  border-bottom:1px solid #EFE9E0;
+  font-size:var(--t-s);font-weight:600;color:var(--tinta);
+}
+.menu-usuario-quien span{
+  display:block;font-weight:400;font-size:var(--t-xs);color:#6B6075;margin-top:2px;
+  overflow-wrap:anywhere;
+}
+.menu-usuario button{
+  display:block;width:100%;text-align:left;
+  padding:var(--e-2) var(--e-3);border:0;border-radius:var(--r-s);
+  background:transparent;font:inherit;font-size:var(--t-s);color:var(--tinta);cursor:pointer;
+  transition:background var(--rapido) var(--sale);
+}
+.menu-usuario button:hover{background:#F4F0F6}
+.menu-usuario button:focus-visible{outline:2px solid var(--ciruela);outline-offset:-2px}
