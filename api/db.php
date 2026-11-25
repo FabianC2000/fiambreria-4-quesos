@@ -41,7 +41,21 @@ function fb_db(): PDO
         /* El mensaje crudo de PDO incluye usuario y host. Solo se
            muestra con depurar activado, nunca en producción. */
         $detalle = !empty($c['depurar']) ? ' ' . $e->getMessage() : '';
-        fb_morir(500, 'No pude conectarme a la base de datos.' . $detalle);
+
+        /* Los dos tropiezos habituales merecen una explicación en
+           castellano en vez del código del motor a secas. */
+        $pista = '';
+        if (str_contains($e->getMessage(), '2002')) {
+            $pista = ' Nadie está escuchando en ' . $c['host'] . ':' . ($c['puerto'] ?? 3306) . '.'
+                   . ' Revisá que MySQL esté iniciado en el panel de XAMPP,'
+                   . " y que 'host' sea 127.0.0.1 y no localhost (en Windows,"
+                   . ' localhost resuelve a IPv6 y MariaDB escucha en IPv4).';
+        } elseif (str_contains($e->getMessage(), '1045')) {
+            $pista = ' El usuario o la contraseña de api/config.php no son los que espera la base.';
+        } elseif (str_contains($e->getMessage(), '1049')) {
+            $pista = " La base '" . $c['base'] . "' no existe todavía: corré sql/01-esquema.sql.";
+        }
+        fb_morir(500, 'No pude conectarme a la base de datos.' . $pista . $detalle);
     }
     return $pdo;
 }

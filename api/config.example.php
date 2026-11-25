@@ -8,7 +8,12 @@ return [
     /* En XAMPP recién instalado el usuario es root y la contraseña
        está vacía. En el hosting te los da el panel cuando creás la
        base, y nunca son root. */
-    'host'   => 'localhost',
+    /* 127.0.0.1 y no 'localhost': en Windows, localhost resuelve
+       primero a ::1 (IPv6) y MariaDB de XAMPP escucha solo en IPv4,
+       así que PDO recibe un "conexión rechazada" (error 2002) aunque
+       el motor esté andando. Con la IP escrita así no hay ambigüedad.
+       En Linux y en el hosting, 'localhost' funciona igual. */
+    'host'   => '127.0.0.1',
     'base'   => 'fiambreria_4quesos',
     'u'      => 'root',
     'clave'  => '',
