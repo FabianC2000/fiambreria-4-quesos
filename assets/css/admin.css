@@ -215,3 +215,28 @@ table.admin-tabla tbody tr:last-child td{border-bottom:0}
 /* En qué orden está la lista: cambia con el filtro, y sin decirlo
    el salto parece un error de la pantalla. */
 .ped-orden{font-size:var(--t-xs);color:#8C8396;margin:0 0 var(--e-4)}
+
+/* ---------- avisarle al cliente ----------
+   Separado de los botones de estado por una línea: cambiar el
+   estado es algo interno, mandarle un mensaje a alguien se sale
+   del sistema. No conviene que se toquen por error. */
+.ped-avisar{margin-top:var(--e-3);padding-top:var(--e-3);border-top:1px dashed #EFE9E0}
+/* Los verdes no son el #25D366 de la marca WhatsApp: contra blanco
+   da 1,98:1 de contraste y hace falta 3:1 para el borde de un
+   control. Con texto blanco encima es peor todavía. Estos están
+   medidos: el borde llega a 5,43:1 y el blanco sobre el fondo
+   fuerte, a 5,43:1. Se sigue leyendo como verde de WhatsApp pero
+   lo puede usar cualquiera. */
+.btn-avisar{
+  display:inline-block;padding:9px 18px;border-radius:var(--r-s);
+  text-decoration:none;font-size:var(--t-s);font-weight:600;
+  background:#fff;border:1px solid #0E7A3C;color:#0E7A3C;
+  transition:background var(--rapido) var(--sale);
+}
+.btn-avisar:hover{background:#EAF9F0}
+.btn-avisar:focus-visible{outline:2px solid #0E7A3C;outline-offset:2px}
+/* Cuando el pedido está listo hay algo concreto que avisar, y el
+   botón pasa a ser la acción principal de la tarjeta. */
+.btn-avisar-fuerte{background:#0E7A3C;border-color:#0E7A3C;color:#fff}
+.btn-avisar-fuerte:hover{background:#0B6B34}
+.ped-sin-tel{font-size:var(--t-xs);color:#8C8396}

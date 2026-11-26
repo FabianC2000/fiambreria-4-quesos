@@ -200,6 +200,26 @@ Dos detalles que no son adorno:
   el pedido de hace dos horas es el que no hay que olvidarse. Las listas de
   entregados y cancelados, en cambio, son historial y van al revés.
 
+### Avisarle al cliente
+
+Cada pedido tiene un botón que abre WhatsApp con el mensaje ya escrito —número
+de pedido, total y sucursal— dirigido al teléfono de esa persona. Lo manda
+quien está en el mostrador, desde el WhatsApp de siempre. Cuando el pedido
+pasa a `listo`, el botón se destaca y el texto cambia a "Avisar que está
+listo".
+
+**No manda el mensaje solo, y es a propósito.** Hacerlo automático requiere la
+API oficial de Meta, que pide verificación del negocio, plantillas aprobadas,
+pago por mensaje entregado y —lo que la vuelve impracticable acá— un número
+que no esté en uso en la app común de WhatsApp: justo el número que el local
+ya usa con todos sus clientes. Para dos sucursales que hoy atienden por
+WhatsApp, un botón que escribe el mensaje resuelve lo mismo sin trámite ni
+costo.
+
+Tampoco se guarda que el aviso se mandó: desde el sitio solo se sabe que se
+abrió WhatsApp, no que alguien haya apretado enviar, y anotar un aviso que
+quizá no salió sería peor que no anotar nada.
+
 Lo que todavía no guarda: quién cambió cada estado y cuándo pasó por cada uno.
 Eso necesitaría una tabla de historial; por ahora queda la fecha del último
 cambio en `pedidos.actualizado`.
@@ -241,9 +261,6 @@ con formación legal antes de publicarse como válidas.
 
 Pendientes del lado técnico:
 
-- Avisarle al cliente por correo cuando su pedido queda listo para retirar.
-  El sistema de correo ya está; falta decidir si suma o es ruido, porque de
-  todos modos hay una conversación de WhatsApp abierta.
 - Guardar quién cambió cada estado de un pedido y cuándo.
 - Antes de abrir el formulario al público, Víctor Hugo Farfán, como responsable
   de la base, tiene que inscribirla en el Registro Nacional de Bases de Datos de

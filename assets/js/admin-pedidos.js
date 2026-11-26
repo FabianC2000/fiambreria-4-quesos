@@ -89,6 +89,48 @@
     return d.length >= 8 ? '+54' + d : '';
   }
 
+  /* ---------- avisarle al cliente ----------
+
+     Esto NO manda el mensaje solo: abre WhatsApp con el texto ya
+     escrito y lo manda la persona que está en el mostrador.
+
+     Mandarlo solo necesitaría la API oficial de Meta, que pide
+     verificación del negocio, plantillas aprobadas, pago por
+     mensaje y —lo que lo vuelve impracticable acá— un número que
+     no esté en uso en la app común de WhatsApp: justo el número
+     que el local ya usa con todos sus clientes.
+
+     Tampoco se guarda que el aviso se mandó: desde acá solo se
+     sabe que se abrió WhatsApp, no que alguien haya apretado
+     enviar, y anotar un aviso que quizá no salió sería peor que no
+     anotar nada. */
+  function mensajeAviso(p) {
+    const nombre = String(p.nombre || '').split(' ')[0];
+    const suc = FB.nombreCorto ? FB.nombreCorto(p.sucursal) : p.sucursal;
+    const plata = pesos(Number(p.total));
+
+    if (p.estado === 'listo') {
+      return `¡Hola ${nombre}! Tu pedido ${p.numero} ya está listo para retirar ` +
+             `en ${suc}. Total: ${plata}. ¡Te esperamos!`;
+    }
+    if (p.estado === 'cancelado') {
+      return `Hola ${nombre}, te escribimos por tu pedido ${p.numero}.`;
+    }
+    if (p.estado === 'entregado') {
+      return `¡Hola ${nombre}! Gracias por tu compra (${p.numero}). ` +
+             '¡Que lo disfrutes!';
+    }
+    return `¡Hola ${nombre}! Recibimos tu pedido ${p.numero} por ${plata} ` +
+           `para retirar en ${suc}. Te avisamos apenas esté listo.`;
+  }
+
+  function textoBotonAviso(estado) {
+    if (estado === 'listo')     return 'Avisar que está listo';
+    if (estado === 'nuevo')     return 'Confirmarle por WhatsApp';
+    if (estado === 'cancelado') return 'Escribirle por WhatsApp';
+    return 'Escribirle por WhatsApp';
+  }
+
   function aviso(texto, mal) {
     const c = $('aviso-pedidos');
     if (!c) return;
@@ -140,6 +182,18 @@
               aria-pressed="${p.estado === id}"
               ${p.estado === id ? 'disabled' : ''}>${esc(nombre)}</button>`).join('');
 
+    /* El aviso se destaca cuando el pedido está listo, que es el
+       momento en que de verdad hay algo que decirle. En los demás
+       estados queda como una acción más. */
+    const avisar = tel
+      ? `<a class="btn-avisar${p.estado === 'listo' ? ' btn-avisar-fuerte' : ''}"
+             target="_blank" rel="noopener"
+             href="https://wa.me/${esc(tel.replace('+', ''))}?text=${
+               encodeURIComponent(mensajeAviso(p))}">
+           ${esc(textoBotonAviso(p.estado))}
+         </a>`
+      : '<span class="ped-sin-tel">Sin teléfono cargado, no se le puede escribir.</span>';
+
     return `
       <article class="tarjeta-ped" data-estado="${esc(p.estado)}" data-id="${esc(p.id)}">
         <header class="ped-cab">
@@ -161,6 +215,7 @@
         ${p.nota ? `<p class="ped-nota"><strong>Aclaración:</strong> ${esc(p.nota)}</p>` : ''}
 
         <div class="ped-estados">${botones}</div>
+        <div class="ped-avisar">${avisar}</div>
       </article>`;
   }
 
