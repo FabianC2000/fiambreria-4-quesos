@@ -76,7 +76,7 @@ INSERT INTO productos (id, nombre, marca, categoria_id, sub_id, tipo, img, desta
   ('f15', 'Salame tipo Milán picado fino', 'La Medalla', 'fiambres', 'embutidos', 'fiambre', 'salamen_medalla.webp', 1, NULL, NULL, 0, 15),
   ('f16', 'Salchichón primavera', 'Klein', 'fiambres', 'embutidos', 'fiambre', 'salchichon_primavera_klein.webp', 0, NULL, NULL, 0, 16),
   ('f17', 'Salchichón primavera', 'Lario', 'fiambres', 'embutidos', 'fiambre', 'salchichon_primavera_lario.webp', 0, NULL, NULL, 0, 17),
-  ('f18', 'Panceta salada', 'Klein', 'fiambres', 'ahumados', 'fiambre', 'panceta_salada_klein.webp', 0, NULL, NULL, 0, 18),
+  ('f18', 'Bondiola curada', 'Klein', 'fiambres', 'ahumados', 'fiambre', 'panceta_salada_klein.webp', 0, NULL, NULL, 0, 18),
   ('f19', 'Panceta salada', 'Lario', 'fiambres', 'ahumados', 'fiambre', 'panceta_salada_lario.webp', 0, NULL, NULL, 0, 19),
   ('q01', 'Queso cremoso', 'Brescia', 'quesos', 'de-maquina', 'fiambre', 'queso_cremoso_brecia.webp', 0, NULL, NULL, 0, 20),
   ('q02', 'Queso cremoso tradicional', 'La Paulina', 'quesos', 'de-maquina', 'fiambre', 'queso_cremoso_lapaulina.webp', 1, NULL, NULL, 0, 21),

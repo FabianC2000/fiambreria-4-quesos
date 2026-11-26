@@ -460,7 +460,7 @@ FB.productos = [
     img:'salchichon_primavera_lario.webp',
     precios:{ g100:1600, media:7800, kg:14200 } },
 
-  { id:'f18', nombre:'Panceta salada', marca:'Klein', categoria:'fiambres', sub:'ahumados', tipo:'fiambre',
+  { id:'f18', nombre:'Bondiola curada', marca:'Klein', categoria:'fiambres', sub:'ahumados', tipo:'fiambre',
     img:'panceta_salada_klein.webp',
     precios:{ g100:2000, media:9800, kg:17900 } },
 
