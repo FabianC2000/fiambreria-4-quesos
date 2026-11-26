@@ -540,6 +540,12 @@ FB.horarioHoy = function (s) {
    SUCURSALES (las usan sucursales.html, el footer y la barra de arriba)
 
    Dos campos para los horarios, y los dos hay que tocar si cambian:
+     id        -> el mismo número que tiene la sucursal en la base.
+                  Lo necesita el carrito para guardar en qué local
+                  se retira el pedido. Si agregás una sucursal acá,
+                  agregala también en la base y poné el id que le
+                  haya tocado, o los pedidos de esa sucursal no se
+                  van a poder guardar.
      horario   -> el texto completo que se lee en sucursales.html
      horarios  -> los mismos datos pero en números, para que el sitio
                   calcule solo si está abierto y qué horario es hoy.
@@ -547,7 +553,8 @@ FB.horarioHoy = function (s) {
                   formato 24 h. Un día cerrado se escribe así: lun:[]
    ------------------------------------------------------------ */
 FB.sucursales = [
-  { nombre:'Fiambreria 4 Quesos - Monterrico',
+  { id:1,
+    nombre:'Fiambreria 4 Quesos - Monterrico',
     direccion:'Santa Fe 111 esquina Jujuy, Monterrico',
     tel:'388 438-0100',
     horario:'Lun a vier 8:30 a 13:00 y 17:00 a 21:30 · Sáb 8:30 a 13:00 y 16:30 a 20:30 · Dom 9:00 a 12:15',
@@ -562,7 +569,8 @@ FB.sucursales = [
     },
     img:'01-sucursal-1-frente.webp' },
 
-  { nombre:'Fiambreria 4 Quesos - Perico',
+  { id:2,
+    nombre:'Fiambreria 4 Quesos - Perico',
     direccion:'San José 1327, Perico',
     tel:'388 310-2497',
     horario:'Lun a Sáb 8:30 a 13:00 y 17:00 a 21:30 · Dom 9:00 a 12:00',

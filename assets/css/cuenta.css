@@ -100,3 +100,79 @@
 .fuerza[data-nivel="2"] span:nth-child(-n+2){background:#E0A030}
 .fuerza[data-nivel="3"] span:nth-child(-n+3){background:#6E9B74}
 .fuerza[data-nivel="4"] span{background:#3F7D50}
+
+/* ============================================================
+   MIS PEDIDOS
+   ============================================================ */
+
+/* La lista necesita más ancho que un formulario: cada renglón
+   lleva nombre, presentación y precio en la misma línea. */
+.cuenta-ancha{max-width:620px}
+
+.pedidos-cargando{color:#6B6075;font-size:var(--t-s);text-align:center;padding:var(--e-7) 0}
+
+.pedidos-vacio{
+  text-align:center;padding:var(--e-8) var(--e-4);
+  border:1px dashed #D8CEC0;border-radius:var(--r);color:#6B6075;
+}
+.pedidos-vacio p{margin:0 0 var(--e-5)}
+.pedidos-vacio p:last-child{margin:0}
+
+.tarjeta-pedido{
+  background:var(--papel);border:1px solid #E8E1D8;border-radius:var(--r);
+  padding:var(--e-5);margin-bottom:var(--e-4);
+}
+
+.pedido-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--e-3)}
+.pedido-id{
+  font-family:var(--display);font-size:var(--t-m);color:var(--ciruela);margin:0;
+}
+.pedido-fecha{font-size:var(--t-xs);color:#8C8396;margin:2px 0 0}
+
+/* El estado se lee, no se adivina por el color: el color
+   acompaña a la palabra, nunca la reemplaza. */
+.pedido-estado{
+  font-size:var(--t-xs);font-weight:600;white-space:nowrap;
+  padding:4px 10px;border-radius:999px;
+  background:#EFEAF2;color:#4A2E56;border:1px solid #DDD2E4;
+}
+.pedido-estado[data-estado="listo"]{background:#E8F3EC;color:#1E5233;border-color:#BFE0CB}
+.pedido-estado[data-estado="entregado"]{background:#F0EDE8;color:#6B6075;border-color:#DED6CA}
+.pedido-estado[data-estado="cancelado"]{background:#FBE9EB;color:#7A1C28;border-color:#F0CDD2}
+
+.pedido-resumen{
+  display:flex;justify-content:space-between;align-items:baseline;gap:var(--e-3);
+  margin-top:var(--e-4);font-size:var(--t-s);color:#6B6075;
+}
+.pedido-resumen strong{font-size:var(--t-m);color:var(--tinta);white-space:nowrap}
+
+/* .btn-texto viene a todo el ancho y centrado, que es lo correcto
+   para "Vaciar carrito" al pie del panel. Acá es una acción
+   secundaria adentro de una tarjeta: va pegada a la izquierda y
+   ocupa lo que mide. */
+.ver-detalle{
+  width:auto;text-align:left;margin-top:var(--e-3);padding:0;
+  font-size:var(--t-s);color:var(--ciruela);
+}
+.ver-detalle:hover{color:var(--vino)}
+
+.pedido-detalle{
+  margin-top:var(--e-4);padding-top:var(--e-4);border-top:1px solid #E8E1D8;
+}
+.pedido-items{list-style:none;margin:0 0 var(--e-3);padding:0}
+.pedido-items li{
+  display:flex;align-items:baseline;gap:var(--e-3);
+  padding:var(--e-2) 0;font-size:var(--t-s);
+}
+.pedido-items li + li{border-top:1px solid #F2EDE6}
+.item-cant{color:#8C8396;min-width:2.2em}
+.item-nombre{flex:1}
+.item-nombre small{display:block;color:#8C8396;font-size:var(--t-xs)}
+.item-sub{white-space:nowrap;font-variant-numeric:tabular-nums}
+.pedido-nota{font-size:var(--t-xs);color:#6B6075;margin:var(--e-2) 0 0;line-height:1.55}
+
+@media (max-width:420px){
+  /* En pantallas angostas el estado se pasaría de ancho al lado
+     del número: se van uno debajo del otro. */
+  .pedido-cab{flex-direction:column;align-items:flex-start}
+}

@@ -12,6 +12,17 @@
   const $ = (id) => document.getElementById(id);
   const api = (archivo) => FB.ruta('api/' + archivo);
 
+  /* Todo dato que venga del servidor y entre al HTML pasa por acá.
+     El nombre lo elige la persona al registrarse y la nota del
+     pedido la escribe ella, así que sin escapar serían una puerta
+     para meter etiquetas en la página de cualquiera que las mire,
+     empezando por la del local cuando revise los pedidos. */
+  function esc(v) {
+    return String(v === null || v === undefined ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   let csrf = '';
 
   /* ---------------------------------------------------------- */
@@ -146,7 +157,7 @@
 
     if (estado.sesion) {
       nota('Ya tenés la sesión abierta como <strong>' +
-            estado.cliente.nombre + '</strong>. <a href="../index.html">Ir al sitio</a>', true);
+            esc(estado.cliente.nombre) + '</strong>. <a href="../index.html">Ir al sitio</a>', true);
       form.hidden = true;
       return;
     }
@@ -218,7 +229,7 @@
     if (!estado) { form.querySelector('button').disabled = true; return; }
 
     if (estado.sesion) {
-      nota('Ya estás dentro como <strong>' + estado.cliente.nombre +
+      nota('Ya estás dentro como <strong>' + esc(estado.cliente.nombre) +
             '</strong>. <a href="../index.html">Ir al sitio</a>', true);
       form.hidden = true;
       return;
@@ -239,7 +250,7 @@
       try {
         const { datos: r } = await enviar('ingresar.php', datos);
         if (r.ok) {
-          nota('Hola ' + r.cliente.nombre + '. Entrando…', true);
+          nota('Hola ' + esc(r.cliente.nombre) + '. Entrando…', true);
           setTimeout(() => { location.href = FB.ruta('index.html'); }, 700);
         } else if (r.verificar) {
           /* Falta confirmar el correo. El botón de reenvío va acá
@@ -455,5 +466,146 @@
     });
   }
 
-  FB.cuenta = { registro, ingreso, olvido, restablecer, arrancar, enviar };
+  /* ---------------------------------------------------------- */
+  /* Mis pedidos                                                 */
+  /* ---------------------------------------------------------- */
+
+  const ESTADOS = {
+    nuevo:      'Recibido',
+    confirmado: 'Confirmado',
+    listo:      'Listo para retirar',
+    entregado:  'Entregado',
+    cancelado:  'Cancelado'
+  };
+
+  /* MySQL devuelve "2026-11-25 21:40:03". new Date() con ese texto
+     no es confiable —Safari lo rechaza— así que se parte a mano. */
+  function fecha(texto) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/.exec(String(texto || ''));
+    if (!m) return '';
+    return `${m[3]}/${m[2]}/${m[1]} a las ${m[4]}:${m[5]}`;
+  }
+
+  function pesos(n) {
+    return (FB && FB.precio) ? FB.precio(n) : '$ ' + n;
+  }
+
+  async function pedidos() {
+    const estado = await arrancar();
+    const caja = $('lista-pedidos');
+    if (!caja) return;
+    if (!estado) return;            // arrancar() ya explicó que falta el servidor
+
+    if (!estado.sesion) {
+      caja.innerHTML = '';
+      nota('<p><strong>Entrá a tu cuenta para ver tus pedidos.</strong></p>' +
+           '<p><a href="ingresar.html">Iniciar sesión</a></p>', false);
+      return;
+    }
+
+    let lista;
+    try {
+      const r = await fetch(api('pedidos.php'), {
+        credentials: 'same-origin', cache: 'no-store'
+      });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'no pude leer los pedidos');
+      lista = d.pedidos || [];
+    } catch (e) {
+      caja.innerHTML = '';
+      nota('No pude traer tus pedidos. Probá recargar la página.', false);
+      return;
+    }
+
+    if (!lista.length) {
+      caja.innerHTML =
+        '<div class="pedidos-vacio">' +
+          '<p>Todavía no hiciste ningún pedido.</p>' +
+          '<p><a class="btn btn-ciruela" href="' + FB.ruta('productos.html') + '">' +
+            'Ver los productos</a></p>' +
+        '</div>';
+      return;
+    }
+
+    caja.innerHTML = lista.map((p) => `
+      <article class="tarjeta-pedido" data-id="${esc(p.id)}">
+        <div class="pedido-cab">
+          <div>
+            <p class="pedido-id">${esc(p.numero)}</p>
+            <p class="pedido-fecha">${esc(fecha(p.creado))}</p>
+          </div>
+          <span class="pedido-estado" data-estado="${esc(p.estado)}">
+            ${esc(ESTADOS[p.estado] || p.estado)}
+          </span>
+        </div>
+        <div class="pedido-resumen">
+          <span>${esc(p.renglones)} ${Number(p.renglones) === 1 ? 'producto' : 'productos'}
+                · Retirás en ${esc(FB.nombreCorto ? FB.nombreCorto(p.sucursal) : p.sucursal)}</span>
+          <strong>${esc(pesos(Number(p.total)))}</strong>
+        </div>
+        <button type="button" class="btn-texto ver-detalle" aria-expanded="false">Ver el detalle</button>
+        <div class="pedido-detalle" hidden></div>
+      </article>`).join('');
+
+    caja.querySelectorAll('.ver-detalle').forEach((boton) => {
+      boton.addEventListener('click', () => detalle(boton));
+    });
+  }
+
+  async function detalle(boton) {
+    const tarjeta = boton.closest('.tarjeta-pedido');
+    const panel = tarjeta.querySelector('.pedido-detalle');
+
+    /* Ya estaba abierto: se cierra y listo. Y si ya se trajo una
+       vez, no se vuelve a pedir al servidor. */
+    if (!panel.hidden) {
+      panel.hidden = true;
+      boton.setAttribute('aria-expanded', 'false');
+      boton.textContent = 'Ver el detalle';
+      return;
+    }
+    if (panel.dataset.cargado === '1') {
+      panel.hidden = false;
+      boton.setAttribute('aria-expanded', 'true');
+      boton.textContent = 'Ocultar el detalle';
+      return;
+    }
+
+    boton.disabled = true;
+    const textoPrevio = boton.textContent;
+    boton.textContent = 'Buscando…';
+    try {
+      const r = await fetch(api('pedidos.php') + '?id=' + encodeURIComponent(tarjeta.dataset.id),
+                            { credentials: 'same-origin', cache: 'no-store' });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'no pude leer el pedido');
+
+      const p = d.pedido;
+      panel.innerHTML =
+        '<ul class="pedido-items">' +
+        p.items.map((i) => `
+          <li>
+            <span class="item-cant">${esc(i.cantidad)}&times;</span>
+            <span class="item-nombre">${esc(i.nombre)}
+              <small>${esc(i.etiqueta)}</small></span>
+            <span class="item-sub">${esc(pesos(Number(i.subtotal)))}</span>
+          </li>`).join('') +
+        '</ul>' +
+        (p.nota ? '<p class="pedido-nota"><strong>Tu aclaración:</strong> ' +
+                  esc(p.nota) + '</p>' : '') +
+        '<p class="pedido-nota">Retirás en ' + esc(p.sucursal) + '.</p>';
+
+      panel.dataset.cargado = '1';
+      panel.hidden = false;
+      boton.setAttribute('aria-expanded', 'true');
+      boton.textContent = 'Ocultar el detalle';
+    } catch (e) {
+      boton.textContent = textoPrevio;
+      nota('No pude traer el detalle de ese pedido.', false);
+    } finally {
+      boton.disabled = false;
+    }
+  }
+
+  FB.cuenta = { registro, ingreso, olvido, restablecer, pedidos, arrancar, enviar };
 })();

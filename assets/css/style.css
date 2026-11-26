@@ -869,6 +869,18 @@ ul{list-style:none}
 .fila-total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:var(--e-4)}
 .fila-total span{color:var(--gris);font-size:var(--t-s)}
 .fila-total strong{font-size:var(--t-xl);letter-spacing:-.02em}
+
+/* ---------- pedido guardado ----------
+   Lo que reemplaza la lista de productos cuando el pedido ya
+   quedó registrado. El número es lo único grande: es el dato que
+   la persona puede necesitar repetir por teléfono. */
+.pedido-listo{padding:var(--e-7) var(--e-5);text-align:center}
+.pedido-numero{
+  font-family:var(--display);font-size:var(--t-xl);color:var(--ciruela);
+  letter-spacing:.02em;margin:0 0 var(--e-4);
+}
+.pedido-texto{font-size:var(--t-s);color:var(--gris);margin:0 0 var(--e-3);line-height:1.55}
+.pedido-texto strong{color:var(--tinta)}
 .btn-texto{
   display:block;width:100%;margin-top:var(--e-2);padding:var(--e-2);
   color:var(--gris);font-size:var(--t-xs);border-radius:var(--r-s);
@@ -1472,11 +1484,17 @@ ul{list-style:none}
   display:block;font-weight:400;font-size:var(--t-xs);color:#6B6075;margin-top:2px;
   overflow-wrap:anywhere;
 }
-.menu-usuario button{
-  display:block;width:100%;text-align:left;
+/* El enlace y el botón del menú se ven igual: para quien lo usa
+   son dos opciones de la misma lista, aunque una navegue y la
+   otra ejecute algo. */
+.menu-usuario button,
+.menu-usuario a{
+  display:block;width:100%;text-align:left;text-decoration:none;
   padding:var(--e-2) var(--e-3);border:0;border-radius:var(--r-s);
   background:transparent;font:inherit;font-size:var(--t-s);color:var(--tinta);cursor:pointer;
   transition:background var(--rapido) var(--sale);
 }
-.menu-usuario button:hover{background:#F4F0F6}
-.menu-usuario button:focus-visible{outline:2px solid var(--ciruela);outline-offset:-2px}
+.menu-usuario button:hover,
+.menu-usuario a:hover{background:#F4F0F6}
+.menu-usuario button:focus-visible,
+.menu-usuario a:focus-visible{outline:2px solid var(--ciruela);outline-offset:-2px}

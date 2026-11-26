@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mis pedidos — Fiambrería 4 Quesos</title>
+  <meta name="description" content="Los pedidos que hiciste en Fiambrería 4 Quesos.">
+  <meta name="theme-color" content="#1B1420">
+  <!-- Datos de una persona: no tiene que quedar indexada. -->
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/cuenta.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+
+<body data-pagina="cuenta">
+  <div id="sitio-header"></div>
+
+  <main class="cuenta-marco cuenta-ancha">
+    <h1>Mis pedidos</h1>
+    <p class="entrada">Lo que pediste por el sitio, del más nuevo al más viejo.</p>
+
+    <div id="nota" role="status" hidden></div>
+
+    <div id="lista-pedidos" aria-live="polite">
+      <p class="pedidos-cargando">Buscando tus pedidos…</p>
+    </div>
+
+    <p class="pie-cuenta"><a href="../productos.html">Seguir comprando</a></p>
+  </main>
+
+  <div id="sitio-footer"></div>
+
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/metricas.js"></script>
+  <script src="../assets/js/carrito.js"></script>
+  <script src="../assets/js/usuarios.js"></script>
+  <script src="../assets/js/header.js"></script>
+  <script src="../assets/js/cuenta.js"></script>
+  <script>FB.cuenta.pedidos();</script>
+</body>
+</html>

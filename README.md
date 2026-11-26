@@ -79,6 +79,7 @@ mysql -u root < sql/01-esquema.sql
 mysql -u root < sql/02-catalogo.sql
 mysql -u root < sql/03-clientes.sql
 mysql -u root < sql/04-recuperacion.sql
+mysql -u root < sql/05-pedidos.sql
 cp api/config.example.php api/config.php    # y completá usuario y clave
 ```
 
@@ -86,9 +87,10 @@ Si XAMPP arrancó MySQL en otro puerto —pasa cuando ya hay un MySQL Workbench
 ocupando el 3306— hay que agregárselo a cada línea: `mysql -u root -P 3307 < …`,
 y poner el mismo número en `'puerto'` dentro de `config.php`.
 
-Las dos primeras migraciones borran y recrean sus tablas; `04` no, porque para
-cuando se corre ya puede haber clientes registrados: usa `ALTER TABLE` y se
-puede correr dos veces sin romper nada.
+`01`, `02`, `03` y `05` borran y recrean sus tablas. `04` no, porque para cuando
+se corre ya puede haber clientes registrados: usa `ALTER TABLE` y se puede
+correr dos veces sin romper nada. Si ya hay pedidos de verdad, `05` tampoco se
+corre de nuevo: los borra.
 
 `01-esquema.sql` crea las tablas: `empresa`, `categorias`, `subcategorias`,
 `productos`, `precios`, `sucursales` y `horarios`, más la vista `v_catalogo`
@@ -143,6 +145,39 @@ Tres decisiones que conviene conocer:
   sesión. Sin eso, cambiarla no echaría a nadie, que es justo lo que uno quiere
   cuando sospecha que se la robaron.
 
+### Pedidos
+
+`05-pedidos.sql` agrega `pedidos` y `pedido_items`, más la vista `v_pedidos`
+para la pantalla del local. El endpoint es `api/pedidos.php`: `POST` guarda,
+`GET` lista los del cliente y `GET ?id=` trae el detalle.
+
+El carrito sigue funcionando igual para quien no tiene cuenta —arma el mensaje
+y abre WhatsApp— y no se obliga a nadie a registrarse para comprar. Con la
+sesión abierta, el pedido se guarda primero, recibe un número (`4Q-00042`) y
+ese número va adentro del mensaje de WhatsApp, así el local puede buscarlo.
+
+Tres decisiones que conviene conocer:
+
+- **Del navegador se acepta qué se pide, nunca cuánto sale.** El POST toma
+  producto, presentación y cantidad; los precios los busca el servidor en la
+  tabla `precios` y calcula el total él. Si el total llegara del navegador,
+  cualquiera podría pedir dos kilos de crudo a cincuenta pesos cambiando un
+  número en la consola del navegador.
+- **Cada renglón guarda una copia del nombre, la presentación y el precio.**
+  Los precios de la fiambrería cambian seguido; si el pedido mirara la tabla
+  de precios, un pedido de marzo mostraría los precios de agosto y el total no
+  coincidiría con lo que la persona pagó. Por eso `producto_id` admite `NULL`:
+  si el producto se da de baja, el renglón sigue diciendo qué se vendió y a
+  cuánto.
+- **La confirmación no abre WhatsApp sola, ofrece un enlace para abrirlo.**
+  Después de esperar la respuesta del servidor el navegador ya no considera
+  que la ventana la pidió la persona, y el bloqueador de ventanas emergentes
+  la frena. Con un enlace que se toca no hay nada que bloquear.
+
+Lo que todavía no está: una pantalla para que el local vea los pedidos y les
+cambie el estado. Hoy los ve por WhatsApp, como siempre, y el pedido guardado
+es el registro.
+
 ### Correo
 
 `api/correo.php` tiene dos modos, que se eligen con `correo_modo`:
@@ -180,8 +215,9 @@ con formación legal antes de publicarse como válidas.
 
 Pendientes del lado técnico:
 
-- Conectar el carrito con la cuenta, para que los pedidos queden guardados
-  (faltan las tablas `pedidos` y `pedido_items`).
+- Una pantalla en el panel para que el local vea los pedidos que entran y les
+  cambie el estado (`nuevo` → `confirmado` → `listo` → `entregado`). Las tablas
+  y la vista ya están; falta la pantalla.
 - Antes de abrir el formulario al público, Víctor Hugo Farfán, como responsable
   de la base, tiene que inscribirla en el Registro Nacional de Bases de Datos de
   la AAIP. El trámite es gratuito y se hace en línea; lo pide el artículo 21 de

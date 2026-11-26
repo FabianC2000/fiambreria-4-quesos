@@ -23,6 +23,15 @@ FB.usuarios = (function () {
   let consultado = false;   // ya se le preguntó al servidor
   let hayBackend = true;
 
+  /* El nombre lo elige la persona al registrarse y solo se valida
+     por largo, así que puede traer cualquier cosa adentro. Antes de
+     armar HTML con él hay que escaparlo. */
+  function esc(v) {
+    return String(v === null || v === undefined ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   /* ---------------------------------------------------------- */
   async function consultar() {
     if (consultado) return sesion;
@@ -80,8 +89,9 @@ FB.usuarios = (function () {
     caja.className = 'menu-usuario';
     const apellido = sesion.apellido ? ' ' + sesion.apellido : '';
     caja.innerHTML =
-      '<p class="menu-usuario-quien">' + sesion.nombre + apellido +
-      '<span>' + sesion.correo + '</span></p>' +
+      '<p class="menu-usuario-quien">' + esc(sesion.nombre) + esc(apellido) +
+      '<span>' + esc(sesion.correo) + '</span></p>' +
+      '<a href="' + FB.ruta('cuenta/pedidos.html') + '">Mis pedidos</a>' +
       '<button type="button" id="menu-salir">Cerrar sesión</button>';
     document.body.appendChild(caja);
 

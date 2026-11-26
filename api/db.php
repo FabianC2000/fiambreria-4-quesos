@@ -144,6 +144,35 @@ function fb_categorias(PDO $db): array
     return $cats;
 }
 
+/* Cómo se llama cada presentación para una persona.
+
+   Tiene que decir lo mismo que FB.opciones() en productos.js, que
+   es lo que ve el cliente cuando elige. Si algún día se agrega una
+   unidad al ENUM de 'precios', hay que tocar los dos lugares.
+
+   Ojo con las de unidad: 'u6' no es el precio de una unidad sino el
+   de las seis juntas. Por eso la etiqueta dice "Llevando 6" y no
+   "6 unidades": en el pedido, cantidad 2 de 'u6' son doce. */
+function fb_etiqueta_unidad(string $unidad): string
+{
+    return [
+        'g100'  => '100 g',
+        'media' => 'Media barra',
+        'kg'    => '1 kg',
+        'u1'    => '1 unidad',
+        'u2'    => 'Llevando 2',
+        'u6'    => 'Llevando 6',
+    ][$unidad] ?? $unidad;
+}
+
+/* El número que ve la gente. Se arma con el id en vez de guardarlo
+   en una columna: con dos fuentes para el mismo dato, tarde o
+   temprano se contradicen. */
+function fb_numero_pedido(int $id): string
+{
+    return '4Q-' . str_pad((string) $id, 5, '0', STR_PAD_LEFT);
+}
+
 function fb_sucursales(PDO $db): array
 {
     $sucs = $db->query('SELECT id, nombre, direccion, tel, img, horario FROM sucursales WHERE activa = 1 ORDER BY orden, id')->fetchAll();
