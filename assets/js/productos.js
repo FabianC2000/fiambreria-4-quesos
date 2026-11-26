@@ -91,6 +91,21 @@ FB.foto = function (carpeta, img, texto, variante) {
     : FB.respaldo(texto, variante);
 };
 
+/* Cada foto de producto está guardada en dos tamaños: 640 px para
+   pantallas grandes y 320 px para el celular. Esto arma el srcset
+   para que el navegador baje la que corresponde: en un teléfono son
+   unos 9 kB en vez de 30, y en Jujuy eso se nota.
+
+   Devuelve '' cuando el producto no tiene foto, así el atributo ni
+   siquiera aparece en el HTML. */
+FB.fotoSrcset = function (carpeta, img) {
+  if (!img) return '';
+  const base = FB.ruta('assets/imagenes/' + carpeta + '/');
+  const chica = img.replace(/\.webp$/, '-320.webp');
+  return ` srcset="${base}${chica} 320w, ${base}${img} 640w"` +
+         ` sizes="(max-width: 700px) 45vw, 240px"`;
+};
+
 /* ------------------------------------------------------------
    PRECIOS
    ------------------------------------------------------------ */
@@ -244,7 +259,7 @@ FB.categorias = [
            {id:'ahumados',nombre:'Ahumados'} ] },
   { id:'quesos', nombre:'Quesos', detalle:'De máquina, de rallar y especiales', img:'quesos.webp',
     subs:[ {id:'de-maquina',nombre:'De máquina'}, {id:'duros',nombre:'Duros y de rallar'},
-           {id:'para-cocinar',nombre:'Para cocinar'} ] },
+           {id:'especiales',nombre:'Especiales'}, {id:'para-cocinar',nombre:'Para cocinar'} ] },
   { id:'picadas', nombre:'Picadas', detalle:'Armadas para compartir', img:'picadas.webp',
     subs:[ {id:'armadas',nombre:'Picadas armadas'}, {id:'tablas',nombre:'Tablas'} ] },
   { id:'lacteos', nombre:'Lácteos', detalle:'Leche, cremas y manteca', img:'lacteos.webp',
@@ -277,6 +292,65 @@ FB.categorias = [
    categorías muestran TODAS; acá va una selección corta, porque la
    portada es para entrar rápido a lo que más se busca. El orden de
    esta lista es el orden en que se ven. */
+/* ------------------------------------------------------------
+   COLOR DE CADA CATEGORÍA
+
+   Un color por rubro, para que el catálogo se recorra con la vista
+   y no leyendo título por título. Se usa en un solo lugar —el
+   ícono de la tarjeta, sobre un fondo del mismo color al 12%— y
+   nunca para el texto: el texto va siempre en la tinta del sitio.
+
+   Están todos medidos contra el fondo claro: el más flojo, el
+   dorado de quesos, da 3,95:1 sobre su propio tinte y 4,57:1 sobre
+   el papel. Si cambiás alguno, volvé a medirlo; el dorado de la
+   marca (#E5A93C) acá no sirve, da menos de 2:1.
+   ------------------------------------------------------------ */
+/* ==========================================================
+   APARICIÓN AL HACER SCROLL
+
+   Las secciones entran con un desplazamiento mínimo cuando
+   asoman en pantalla. Tres cuidados, que son los que separan
+   un detalle lindo de una molestia:
+
+   · Lo que ya está visible al cargar NO se anima. Si la primera
+     pantalla apareciera de a poco, el sitio se sentiría más
+     lento, justo lo contrario de lo que se busca.
+   · Pasa una sola vez por elemento; volver a subir no lo repite.
+   · Si el navegador no tiene IntersectionObserver, o la persona
+     pidió menos movimiento, no se toca nada y todo se ve.
+   ========================================================== */
+FB.aparecer = function (selector) {
+  const quieto = window.matchMedia &&
+                 window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (quieto || !('IntersectionObserver' in window)) return;
+
+  const alto = window.innerHeight || 0;
+  const candidatos = [...document.querySelectorAll(selector)].filter((el) => {
+    /* Lo de la primera pantalla queda como está. */
+    return el.getBoundingClientRect().top > alto * 0.9;
+  });
+  if (!candidatos.length) return;
+
+  candidatos.forEach((el) => el.classList.add('aparece'));
+
+  const ojo = new IntersectionObserver((entradas) => {
+    entradas.forEach((e) => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      ojo.unobserve(e.target);
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+
+  candidatos.forEach((el) => ojo.observe(el));
+};
+
+FB.colorCategoria = {
+  fiambres:'#8A2433', quesos:'#9A6A0F', picadas:'#5B3A6B', lacteos:'#2C5C86',
+  almacen:'#466632', panificados:'#8E571C', bebidas:'#6E2A49', congelados:'#1F6E7E',
+  desayuno:'#A64E1C', aceitunas:'#4F6E27', helados:'#A63A6E', reposteria:'#6D45A0',
+  golosinas:'#A82C2C', limpieza:'#1A7468'
+};
+
 FB.catsPortada = ['fiambres','lacteos','bebidas','helados','golosinas','reposteria','limpieza','desayuno','aceitunas'];
 FB.catsDePortada = () =>
   FB.catsPortada.map((id) => FB.categorias.find((c) => c.id === id)).filter(Boolean);
@@ -309,50 +383,170 @@ FB.contarSub = (catId, subId) => FB.porSub(catId, subId).length;
    marca y la de cierre cuando importás un Excel. Si las borrás, el
    importador no sabe dónde escribir y te lo va a avisar. */
 FB.productos = [
-  { id:'p01', nombre:'Jamón cocido natural', marca:'Paladini', categoria:'fiambres', sub:'jamones', tipo:'fiambre',
-    img:null, /* subí la foto y poné aquí: 'jamon-cocido.jpg' */ destacado:true, etiqueta:'Más vendido',
-    precios:{ g100:1290, media:8900, kg:16900 } },
+  /* --------------------------------------------------------------
+     FIAMBRES Y QUESOS — los productos que se venden en el local,
+     con las fotos que sacó Fabi.
 
-  { id:'p02', nombre:'Jamón crudo estacionado', marca:'Cagnoli', categoria:'fiambres', sub:'jamones', tipo:'fiambre',
-    img:null, /* subí la foto y poné aquí: 'jamon-crudo.jpg' */ destacado:true,
-    precios:{ g100:3450, media:24500, kg:47900 } },
+     OJO CON LOS PRECIOS: los de esta sección están INVENTADOS. Se
+     pusieron para que las pantallas se vean con datos de la forma
+     correcta, no porque sean los del local. Cargá los de verdad
+     desde el panel antes de publicar.
+     -------------------------------------------------------------- */
+{ id:'f01', nombre:'Fiambre cocido de paleta', marca:'Lario', categoria:'fiambres', sub:'jamones', tipo:'fiambre',
+    img:'jamon_cocido_lario.webp', destacado:true, etiqueta:'Más vendido',
+    precios:{ g100:1500, media:7600, kg:13900 } },
 
-  { id:'p03', nombre:'Salame tipo Milán', marca:'La Pampa', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
-    img:null, /* subí la foto y poné aquí: 'salame-milan.jpg' */ destacado:true, etiqueta:'Oferta',
-    precios:{ g100:1690, media:11200, kg:21500 } },
+  { id:'f02', nombre:'Paleta cocida para emparedados', marca:'Pampita', categoria:'fiambres', sub:'jamones', tipo:'fiambre',
+    img:'paleta_pampita.webp',
+    precios:{ g100:1300, media:6500, kg:11900 } },
 
-  { id:'p04', nombre:'Mortadela con pistachos', marca:'Vitali', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
-    img:null, /* subí la foto y poné aquí: 'mortadela.jpg' */
-    precios:{ g100:1150, media:7600, kg:14500 } },
+  { id:'f03', nombre:'Fiambre cocido', marca:'Triana', categoria:'fiambres', sub:'jamones', tipo:'fiambre',
+    img:'paleta_triana.webp',
+    precios:{ g100:1400, media:6800, kg:12400 } },
 
-  { id:'p05', nombre:'Bondiola ahumada', marca:'Paladini', categoria:'fiambres', sub:'ahumados', tipo:'fiambre',
-    img:null, /* subí la foto y poné aquí: 'bondiola.jpg' */ destacado:true,
-    precios:{ g100:2390, media:16400, kg:31500 } },
+  { id:'f04', nombre:'Morcillón con lengua', marca:'Lario', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'morcillon_lario.webp',
+    precios:{ g100:1700, media:8400, kg:15200 } },
 
-  { id:'p06', nombre:'Lomito ahumado', marca:'Cagnoli', categoria:'fiambres', sub:'ahumados', tipo:'fiambre',
-    img:null, /* subí la foto y poné aquí: 'lomito.jpg' */
-    precios:{ g100:2190, media:14900, kg:28900 } },
+  { id:'f05', nombre:'Mortadela bocha', marca:'La Medalla', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'mortadela_bocha_medalla.webp',
+    precios:{ g100:1200, media:6000, kg:10900 } },
 
-  { id:'p07', nombre:'Queso de máquina Danbo', marca:'La Serenísima', categoria:'quesos', sub:'de-maquina', tipo:'fiambre',
-    img:null, /* subí la foto y poné aquí: 'danbo.jpg' */ destacado:true, etiqueta:'Oferta',
-    precios:{ g100:1490, media:9900, kg:18900 } },
+  { id:'f06', nombre:'Mortadela común', marca:'66', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'mortadela_comun_66.webp',
+    precios:{ g100:1100, media:5400, kg:9800 } },
 
-  { id:'p08', nombre:'Queso cremoso', marca:'Verónica', categoria:'quesos', sub:'de-maquina', tipo:'fiambre',
-    img:null, /* subí la foto y poné aquí: 'cremoso.jpg' */
-    precios:{ g100:1390, media:9200, kg:17600 } },
+  { id:'f07', nombre:'Mortadela', marca:'Paladini', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'mortadela_paladini.webp', destacado:true,
+    precios:{ g100:1400, media:7100, kg:12900 } },
 
-  { id:'p09', nombre:'Queso Pategrás', marca:'Ilolay', categoria:'quesos', sub:'duros', tipo:'fiambre',
-    img:null, /* subí la foto y poné aquí: 'pategras.jpg' */
-    precios:{ g100:1790, media:11900, kg:22900 } },
+  { id:'f08', nombre:'Queso de cerdo', marca:'Lario', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'queso_de_cerdo_lario.webp',
+    precios:{ g100:1500, media:7400, kg:13400 } },
 
-  { id:'p10', nombre:'Queso Sardo para rallar', marca:'Santa Rosa', categoria:'quesos', sub:'duros', tipo:'fiambre',
-    img:null, /* subí la foto y poné aquí: 'sardo.jpg' */ destacado:true,
-    precios:{ g100:2290, media:15600, kg:29900 } },
+  { id:'f09', nombre:'Queso de cerdo', marca:'Tacural', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'queso_de_cerdo_tacural.webp',
+    precios:{ g100:1400, media:7000, kg:12800 } },
 
-  { id:'p11', nombre:'Provoleta para parrilla', marca:'Tregar', categoria:'quesos', sub:'para-cocinar', tipo:'unidad',
-    img:null, /* subí la foto y poné aquí: 'provoleta.jpg' */ etiqueta:'Nuevo',
-    precios:{ u1:3890, u2:7200, u6:20400 } },
+  { id:'f10', nombre:'Salame', marca:'Lario', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'salame_lario.webp',
+    precios:{ g100:2400, media:11800, kg:21500 } },
 
+  { id:'f11', nombre:'Salamín tipo Milán', marca:'66', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'salamen_66.webp',
+    precios:{ g100:2200, media:10900, kg:19900 } },
+
+  { id:'f12', nombre:'Salamín bastón picado grueso', marca:'Lario', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'salamen_baston_picado_grueso.webp',
+    precios:{ g100:2600, media:12900, kg:23500 } },
+
+  { id:'f13', nombre:'Salamín', marca:'Fela', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'salamen_fela.webp',
+    precios:{ g100:2100, media:10400, kg:18900 } },
+
+  { id:'f14', nombre:'Salamín tipo Milán', marca:'La Casona', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'salamen_la_casona.webp',
+    precios:{ g100:2200, media:11200, kg:20400 } },
+
+  { id:'f15', nombre:'Salame tipo Milán picado fino', marca:'La Medalla', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'salamen_medalla.webp', destacado:true,
+    precios:{ g100:2500, media:12600, kg:22900 } },
+
+  { id:'f16', nombre:'Salchichón primavera', marca:'Klein', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'salchichon_primavera_klein.webp',
+    precios:{ g100:1600, media:8200, kg:14900 } },
+
+  { id:'f17', nombre:'Salchichón primavera', marca:'Lario', categoria:'fiambres', sub:'embutidos', tipo:'fiambre',
+    img:'salchichon_primavera_lario.webp',
+    precios:{ g100:1600, media:7800, kg:14200 } },
+
+  { id:'f18', nombre:'Panceta salada', marca:'Klein', categoria:'fiambres', sub:'ahumados', tipo:'fiambre',
+    img:'panceta_salada_klein.webp',
+    precios:{ g100:2000, media:9800, kg:17900 } },
+
+  { id:'f19', nombre:'Panceta salada', marca:'Lario', categoria:'fiambres', sub:'ahumados', tipo:'fiambre',
+    img:'panceta_salada_lario.webp',
+    precios:{ g100:1800, media:9100, kg:16500 } },
+
+  { id:'q01', nombre:'Queso cremoso', marca:'Brescia', categoria:'quesos', sub:'de-maquina', tipo:'fiambre',
+    img:'queso_cremoso_brecia.webp',
+    precios:{ g100:1400, media:7100, kg:12900 } },
+
+  { id:'q02', nombre:'Queso cremoso tradicional', marca:'La Paulina', categoria:'quesos', sub:'de-maquina', tipo:'fiambre',
+    img:'queso_cremoso_lapaulina.webp', destacado:true,
+    precios:{ g100:1600, media:8000, kg:14500 } },
+
+  { id:'q03', nombre:'Cremón', marca:'La Serenísima', categoria:'quesos', sub:'de-maquina', tipo:'fiambre',
+    img:'queso_cremoso_laserenisima.webp',
+    precios:{ g100:1700, media:8500, kg:15400 } },
+
+  { id:'q04', nombre:'Queso cremoso', marca:'Nueva Villa', categoria:'quesos', sub:'de-maquina', tipo:'fiambre',
+    img:'queso_cremoso_nueva_villa.webp',
+    precios:{ g100:1400, media:6800, kg:12400 } },
+
+  { id:'q05', nombre:'Queso cremoso', marca:'Los Taurinos', categoria:'quesos', sub:'de-maquina', tipo:'fiambre',
+    img:'queso_cremoso_taurino.webp',
+    precios:{ g100:1300, media:6500, kg:11900 } },
+
+  { id:'q06', nombre:'Queso Danbo tradicional', marca:'La Paulina', categoria:'quesos', sub:'de-maquina', tipo:'fiambre',
+    img:'queso_danbo_paulina.webp',
+    precios:{ g100:1600, media:8200, kg:14900 } },
+
+  { id:'q07', nombre:'Queso Danbo', marca:'Sancor', categoria:'quesos', sub:'de-maquina', tipo:'fiambre',
+    img:'queso_danbo_sancor.webp',
+    precios:{ g100:1600, media:7800, kg:14200 } },
+
+  { id:'q08', nombre:'Queso Danbo', marca:'Tregar', categoria:'quesos', sub:'de-maquina', tipo:'fiambre',
+    img:'queso_danbo_tregar.webp',
+    precios:{ g100:1500, media:7600, kg:13800 } },
+
+  { id:'q09', nombre:'Queso Pategrás', marca:null, categoria:'quesos', sub:'de-maquina', tipo:'fiambre',
+    img:'queso_pategras.webp',
+    precios:{ g100:1900, media:9300, kg:16900 } },
+
+  { id:'q10', nombre:'Cheddar barra para fetear', marca:'La Quesera', categoria:'quesos', sub:'de-maquina', tipo:'fiambre',
+    img:'queso_cheddar_bara_para_fetar.webp',
+    precios:{ g100:1700, media:8700, kg:15900 } },
+
+  { id:'q11', nombre:'Cheddar feteado', marca:'Tonadita', categoria:'quesos', sub:'de-maquina', tipo:'unidad',
+    img:'queso_chedar_feteado.webp',
+    precios:{ u1:3200, u2:6100, u6:17300 } },
+
+  { id:'q12', nombre:'Cheddar untable', marca:'La Quesera', categoria:'quesos', sub:'de-maquina', tipo:'unidad',
+    img:'queso_chedar_puch.webp',
+    precios:{ u1:4900, u2:9300, u6:26500 } },
+
+  { id:'q13', nombre:'Parmesano horma', marca:'La Quesera', categoria:'quesos', sub:'duros', tipo:'fiambre',
+    img:'queso_parmesano_laquesera.webp',
+    precios:{ g100:2700, media:13700, kg:24900 } },
+
+  { id:'q14', nombre:'Parmesano barra', marca:'Milkaut', categoria:'quesos', sub:'duros', tipo:'fiambre',
+    img:'queso_parmesano_milkaut.webp',
+    precios:{ g100:2600, media:12900, kg:23500 } },
+
+  { id:'q15', nombre:'Reggianito', marca:'La Paulina', categoria:'quesos', sub:'duros', tipo:'fiambre',
+    img:'regianito_pieza.webp', destacado:true,
+    precios:{ g100:3000, media:14800, kg:26900 } },
+
+  { id:'q16', nombre:'Queso azul', marca:'La Quesera', categoria:'quesos', sub:'especiales', tipo:'fiambre',
+    img:'queso_roqueford.webp',
+    precios:{ g100:3500, media:17500, kg:31900 } },
+
+  { id:'q17', nombre:'Muzzarella en barra', marca:'Brescia', categoria:'quesos', sub:'para-cocinar', tipo:'fiambre',
+    img:'queso_muzza_brecia.webp',
+    precios:{ g100:1500, media:7600, kg:13900 } },
+
+  { id:'q18', nombre:'Provolone en barra', marca:null, categoria:'quesos', sub:'para-cocinar', tipo:'fiambre',
+    img:'queso_provelone.webp',
+    precios:{ g100:2200, media:10900, kg:19900 } },
+
+  { id:'q19', nombre:'Provoletas con especias', marca:null, categoria:'quesos', sub:'para-cocinar', tipo:'unidad',
+    img:'queso_pomarola.webp', etiqueta:'Para la parrilla',
+    precios:{ u1:3900, u2:7400, u6:21100 } },
+
+  /* --------------------------------------------------------------
+     EL RESTO DE LAS CATEGORÍAS — todavía sin foto.
+     -------------------------------------------------------------- */
   { id:'p12', nombre:'Picada clásica para 2', marca:'4 Quesos', categoria:'picadas', sub:'armadas', tipo:'unidad',
     img:null, /* subí la foto y poné aquí: 'picada-2.jpg' */ destacado:true, etiqueta:'Más vendido',
     precios:{ u1:12900, u2:24500, u6:69900 } },

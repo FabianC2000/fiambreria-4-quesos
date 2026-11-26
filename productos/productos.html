@@ -8,9 +8,52 @@
   <meta name="theme-color" content="#1A1625">
   <link rel="stylesheet" href="../assets/css/style.css">
   <script>window.RAIZ = '../';</script>
+  <!-- ==========================================================
+       PANTALLA DE CARGA
+
+       Aparece el logo mientras la página termina de armarse.
+
+       El detalle que la hace útil en vez de molesta: NO se muestra
+       enseguida. Arranca invisible y recién empieza a aparecer a
+       los 400 ms. Si la página carga antes —que es lo normal en
+       una computadora o con buena señal— el JS la saca y nadie la
+       ve nunca. Se ve cuando de verdad hay una espera, que es con
+       datos móviles flojos, y entonces en lugar de una pantalla en
+       blanco se ve la marca.
+
+       Dos seguros: si el JS fallara, la animación igual la
+       esconde sola a los 3,5 s; y a quien pidió menos movimiento
+       no se le muestra nunca.
+       ========================================================== -->
+  <style>
+    #cargando{
+      position:fixed;inset:0;z-index:9999;
+      display:grid;place-items:center;background:#1B1420;
+      opacity:0;visibility:hidden;
+      animation:cargando-entra .3s ease-out .4s forwards,
+                cargando-sale .4s ease-in 3.5s forwards;
+    }
+    #cargando img{width:min(190px,46vw);height:auto}
+    #cargando.listo{animation:cargando-sale .3s ease-out forwards}
+    @keyframes cargando-entra{to{opacity:1;visibility:visible}}
+    @keyframes cargando-sale{to{opacity:0;visibility:hidden}}
+    @media (prefers-reduced-motion:reduce){#cargando{display:none}}
+  </style>
 </head>
 
 <body data-pagina="productos">
+  <div id="cargando" aria-hidden="true"><img src="../assets/imagenes/logo/logo-dark.webp" alt=""></div>
+  <script>
+    /* Apenas el documento está armado, se va. El setTimeout dura
+       lo que el desvanecido. */
+    document.addEventListener('DOMContentLoaded', function () {
+      var c = document.getElementById('cargando');
+      if (!c) return;
+      c.classList.add('listo');
+      setTimeout(function () { c.remove(); }, 320);
+    });
+  </script>
+
 
   <header id="sitio-header"></header>
 

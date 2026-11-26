@@ -9,6 +9,12 @@
 
 USE fiambreria_4quesos;
 
+-- pedidos.cliente_id apunta a clientes, así que la tabla de
+-- pedidos tiene que irse antes. Volver a correr este archivo
+-- BORRA LOS PEDIDOS: hay que correr 05 de nuevo después.
+DROP TABLE IF EXISTS pedido_items;
+DROP TABLE IF EXISTS pedidos;
+
 DROP TABLE IF EXISTS consentimientos;
 DROP TABLE IF EXISTS tokens;
 DROP TABLE IF EXISTS clientes;

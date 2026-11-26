@@ -9,18 +9,27 @@
 -- o pegarlo en phpMyAdmin con la pestaña SQL.
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS fiambreria_4quesos
+-- ------------------------------------------------------------
+-- ESTE ARCHIVO EMPIEZA DE CERO: borra la base entera y la vuelve
+-- a crear. Se lleva puesto todo, incluidos los clientes y los
+-- pedidos que hubiera.
+--
+-- Después hay que correr, en este orden:
+--   02-catalogo.sql   03-clientes.sql
+--   04-recuperacion.sql   05-pedidos.sql
+--
+-- Antes borraba tabla por tabla, pero con las migraciones que se
+-- fueron sumando dejó de alcanzar: clientes.sucursal_preferida
+-- apunta a sucursales y pedidos apunta a las dos, así que el
+-- borrado fallaba a mitad de camino y dejaba la base rota. Tirar
+-- la base entera no tiene ese problema, y además dice con todas
+-- las letras lo que hace.
+-- ------------------------------------------------------------
+DROP DATABASE IF EXISTS fiambreria_4quesos;
+
+CREATE DATABASE fiambreria_4quesos
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE fiambreria_4quesos;
-
--- Orden inverso al de creación, por las claves foráneas.
-DROP TABLE IF EXISTS horarios;
-DROP TABLE IF EXISTS precios;
-DROP TABLE IF EXISTS productos;
-DROP TABLE IF EXISTS subcategorias;
-DROP TABLE IF EXISTS categorias;
-DROP TABLE IF EXISTS sucursales;
-DROP TABLE IF EXISTS empresa;
 
 -- ------------------------------------------------------------
 -- Datos del comercio

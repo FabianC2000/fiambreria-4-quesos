@@ -10,6 +10,18 @@ FB.carrito = (function () {
   const CLAVE = 'fiambreria_carrito';
   let items = FB.leer(CLAVE, []);   // [{id, opcion, cantidad}]
 
+  /* Si un producto salió del catálogo, el renglón guardado en el
+     navegador ya no se puede mostrar ni cotizar. El panel lo
+     salteaba, pero el contador del header lo seguía sumando: se
+     veía "3" y adentro había dos cosas. Se limpian al arrancar. */
+  (function limpiarFantasmas() {
+    const vivos = items.filter((it) => FB.porId(it.id));
+    if (vivos.length !== items.length) {
+      items = vivos;
+      FB.guardar(CLAVE, items);
+    }
+  })();
+
   /* ---------- helpers ---------- */
   function persistir() {
     FB.guardar(CLAVE, items);

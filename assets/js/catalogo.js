@@ -20,8 +20,9 @@ FB.catalogo = (function () {
       <article class="tarjeta-producto" data-id="${p.id}">
         <div class="producto-figura">
           ${p.etiqueta ? `<span class="insignia ${p.etiqueta === 'Nuevo' ? 'nuevo' : ''}">${p.etiqueta}</span>` : ''}
-          <img src="${FB.foto('productos', p.img, '4Q')}" alt="${p.nombre}"
-               loading="lazy" onerror="FB.alFallarImagen(this,'4Q')">
+          <img src="${FB.foto('productos', p.img, '4Q')}"${FB.fotoSrcset('productos', p.img)}
+               alt="${p.nombre}" width="640" height="640"
+               loading="lazy" decoding="async" onerror="FB.alFallarImagen(this,'4Q')">
         </div>
         <div class="producto-cuerpo">
           <span class="producto-marca">${p.marca}</span>
@@ -414,7 +415,8 @@ FB.catalogo = (function () {
     cont.innerHTML = datos.map((c) => {
       const n = FB.porCategoria(c.id).length;
       return `
-        <a class="tarjeta-categoria" href="${FB.ruta('productos/productos.html')}?cat=${c.id}">
+        <a class="tarjeta-categoria" href="${FB.ruta('productos/productos.html')}?cat=${c.id}"
+           style="--acento:${FB.colorCategoria[c.id] || 'var(--ciruela)'}">
           <div class="cat-figura">${FB.marcaCategoria(c)}</div>
           <div class="cat-pie">
             <h3>${c.nombre}</h3>

@@ -622,7 +622,26 @@ ul{list-style:none}
 .carrusel-pista .tarjeta-producto{width:230px;flex:0 0 230px}
 
 .producto-figura{position:relative;aspect-ratio:1/1;background:var(--papel-2);overflow:hidden}
-.producto-figura img{width:100%;height:100%;object-fit:cover}
+.producto-figura img{
+  width:100%;height:100%;object-fit:cover;
+  /* Un acercamiento apenas perceptible: la foto se siente viva sin
+     que el producto se mueva de lugar. Solo transform, que el
+     navegador resuelve sin volver a calcular el diseño. */
+  transition:transform 220ms var(--sale);
+}
+.tarjeta-producto:hover .producto-figura img,
+.tarjeta-producto:focus-within .producto-figura img{transform:scale(1.045)}
+
+/* ---------- aparición al entrar en pantalla ----------
+   La clase la pone el JS (ver inicio de catalogo.js): sin JS, o si
+   algo falla, el contenido se ve igual. Nunca se aplica a lo que
+   ya está a la vista al cargar, para que la página no parezca más
+   lenta de lo que es. */
+.aparece{opacity:0;transform:translateY(10px)}
+.aparece.visible{
+  opacity:1;transform:none;
+  transition:opacity 320ms var(--sale), transform 320ms var(--sale);
+}
 
 .insignia{
   position:absolute;top:var(--e-3);left:var(--e-3);z-index:2;
@@ -689,10 +708,47 @@ ul{list-style:none}
    llenan el recuadro sin bandas blancas a los costados.
    min-height:0 porque si no la altura la termina decidiendo el alto
    real del archivo en vez de esta proporción. */
+/* El color de cada rubro entra por --acento, que pone la tarjeta
+   desde el JS. Solo tiñe el fondo y el trazo del ícono; el título
+   y la bajada siguen en la tinta de siempre, porque catorce
+   colores de texto serían ilegibles y un circo. */
 .cat-figura{
   aspect-ratio:1/1;min-height:0;overflow:hidden;
   display:grid;grid-template:minmax(0,1fr) / minmax(0,1fr);place-items:center;
-  background:var(--papel-2);color:var(--ciruela);
+  /* El respaldo va primero: un navegador que no entienda
+     color-mix se queda con el fondo de antes y no con nada. */
+  background:var(--papel-2);
+  background:color-mix(in srgb, var(--acento, var(--ciruela)) 12%, var(--papel-2));
+  color:var(--acento, var(--ciruela));
+  transition:background var(--rapido) var(--sale);
+}
+.tarjeta-categoria:hover .cat-figura{
+  background:color-mix(in srgb, var(--acento, var(--ciruela)) 20%, var(--papel-2));
+}
+/* Una barra del color del rubro al pie de cada tarjeta. Siempre
+   visible, no solo al pasar el mouse: es lo que hace que la
+   grilla se lea de un vistazo y la que le pone color a una página
+   que si no es toda crema y tinta.
+
+   Va acá y no sobre la figura porque casi todas las categorías
+   tienen foto, y una foto tapa cualquier fondo. */
+.tarjeta-categoria{position:relative;overflow:hidden}
+.tarjeta-categoria::before{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:4px;z-index:1;
+  background:var(--acento, var(--ciruela));
+  transform-origin:left;
+  transition:height var(--rapido) var(--sale);
+}
+.tarjeta-categoria:hover::before,
+.tarjeta-categoria:focus-visible::before{height:7px}
+
+/* El recuento de productos, con el color del rubro: un dato que
+   ya estaba, ahora además ubica. */
+.cat-pie span{position:relative}
+.tarjeta-categoria .cat-pie h3::after{
+  content:"";display:inline-block;width:7px;height:7px;border-radius:50%;
+  margin-left:8px;vertical-align:middle;
+  background:var(--acento, var(--ciruela));
 }
 .cat-figura svg{
   width:46px;height:46px;
@@ -1340,7 +1396,10 @@ ul{list-style:none}
   .logo{grid-area:logo}
   .header-acciones{grid-area:acciones}
   .buscador{grid-area:buscador;max-width:none}
-  .logo img{height:46px}
+  /* Más grande que en escritorio, no más chico: en el celular el
+     logo es casi lo único de marca que entra en pantalla, y es
+     justo donde más gente entra. Antes medía 46 px. */
+  .logo img{height:64px}
   .accion-texto{display:none}
   .btn-menu{display:grid}
 
@@ -1453,6 +1512,10 @@ ul{list-style:none}
 
   .carrusel-pista{animation:none;width:100%}
   .carrusel{overflow-x:auto;-webkit-mask-image:none;mask-image:none}
+
+  /* La aparición al hacer scroll se desactiva del todo: no se
+     "hace más rápida", simplemente no pasa. */
+  .aparece{opacity:1 !important;transform:none !important}
 
   *,*::before,*::after{
     transition-duration:1ms !important;
