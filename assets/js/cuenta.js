@@ -521,7 +521,7 @@
       caja.innerHTML =
         '<div class="pedidos-vacio">' +
           '<p>Todavía no hiciste ningún pedido.</p>' +
-          '<p><a class="btn btn-ciruela" href="' + FB.ruta('productos.html') + '">' +
+          '<p><a class="btn btn-ciruela" href="' + FB.ruta('productos/productos.html') + '">' +
             'Ver los productos</a></p>' +
         '</div>';
       return;

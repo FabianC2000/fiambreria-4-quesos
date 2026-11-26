@@ -26,19 +26,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # El panel de administración queda versionado en el repositorio
-      # pero NO se publica. Es una pantalla sin autenticación real: en
-      # un sitio estático cualquier contraseña viaja en el código y se
-      # lee con botón derecho. Se usa en local, con XAMPP. Cuando haya
-      # un backend con login de verdad, se borra este paso.
-      - name: Armar lo que se publica, sin el panel
+      # Qué NO se publica, y por qué:
+      #
+      # admin/        el panel. La pantalla del catálogo no tiene
+      #               contraseña y no puede tenerla en un sitio
+      #               estático: cualquier clave viajaría en el código
+      #               y se lee con botón derecho. La de pedidos sí
+      #               exige sesión, pero necesita PHP, que acá no hay.
+      # api/, sql/    GitHub Pages no ejecuta PHP: los serviría como
+      #               texto plano. El código ya está a la vista en el
+      #               repositorio, así que esto no esconde nada; es
+      #               para no publicar archivos que en este sitio no
+      #               hacen nada.
+      # los JS del panel  solo los cargan las páginas de admin/.
+      - name: Armar lo que se publica, sin el panel ni el backend
         run: |
           mkdir -p _publicar
           rsync -a --exclude='.git' --exclude='.github' \
-                   --exclude='admin' --exclude='assets/js/vendor' \
+                   --exclude='admin' --exclude='api' --exclude='sql' \
+                   --exclude='almacen' --exclude='assets/js/vendor' \
+                   --exclude='assets/js/admin-pedidos.js' \
+                   --exclude='assets/js/importador.js' \
+                   --exclude='assets/js/tablero.js' \
                    --exclude='_publicar' ./ _publicar/
           echo "Se publican $(find _publicar -type f | wc -l) archivos."
-          test ! -d _publicar/admin || { echo "El panel se coló en la publicación"; exit 1; }
+          for prohibido in admin api sql almacen; do
+            test ! -d "_publicar/$prohibido" || {
+              echo "Se coló $prohibido en la publicación"; exit 1; }
+          done
+          test -z "$(find _publicar -name '*.php' -print -quit)" || {
+            echo "Se coló un .php en la publicación"; exit 1; }
+          # Y lo que sí tiene que estar:
+          for necesario in index.html assets/js/productos.js assets/js/carrito.js; do
+            test -f "_publicar/$necesario" || {
+              echo "Falta $necesario en la publicación"; exit 1; }
+          done
 
       - uses: actions/configure-pages@v5
         with:

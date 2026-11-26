@@ -174,9 +174,35 @@ Tres decisiones que conviene conocer:
   que la ventana la pidió la persona, y el bloqueador de ventanas emergentes
   la frena. Con un enlace que se toca no hay nada que bloquear.
 
-Lo que todavía no está: una pantalla para que el local vea los pedidos y les
-cambie el estado. Hoy los ve por WhatsApp, como siempre, y el pedido guardado
-es el registro.
+### La pantalla del local
+
+`admin/pedidos.html` muestra lo que entra y permite cambiar el estado
+(`nuevo` → `confirmado` → `listo` → `entregado`, o `cancelado`). Filtra por
+estado y por sucursal, busca por número, nombre o teléfono, y se actualiza
+sola cada 45 segundos mientras la pestaña esté a la vista.
+
+Esta pantalla **sí pide sesión**, a diferencia de la del catálogo: muestra
+nombres, teléfonos y compras de otras personas. Hace falta una cuenta con rol
+de administración, y eso se da una sola vez desde la base:
+
+```sql
+UPDATE clientes SET rol = 'admin' WHERE correo = 'tucorreo@ejemplo.com';
+```
+
+A propósito no hay forma de hacerlo desde el sitio: si la hubiera, sería el
+primer lugar donde buscaría cualquiera.
+
+Dos detalles que no son adorno:
+
+- **A quien no es administrador se le contesta 404, no 403.** Un 403 diría
+  "existe pero no podés"; un 404 no confirma siquiera que la pantalla exista.
+- **Los pendientes salen con los más viejos arriba.** Es una cola de trabajo:
+  el pedido de hace dos horas es el que no hay que olvidarse. Las listas de
+  entregados y cancelados, en cambio, son historial y van al revés.
+
+Lo que todavía no guarda: quién cambió cada estado y cuándo pasó por cada uno.
+Eso necesitaría una tabla de historial; por ahora queda la fecha del último
+cambio en `pedidos.actualizado`.
 
 ### Correo
 
@@ -215,9 +241,10 @@ con formación legal antes de publicarse como válidas.
 
 Pendientes del lado técnico:
 
-- Una pantalla en el panel para que el local vea los pedidos que entran y les
-  cambie el estado (`nuevo` → `confirmado` → `listo` → `entregado`). Las tablas
-  y la vista ya están; falta la pantalla.
+- Avisarle al cliente por correo cuando su pedido queda listo para retirar.
+  El sistema de correo ya está; falta decidir si suma o es ruido, porque de
+  todos modos hay una conversación de WhatsApp abierta.
+- Guardar quién cambió cada estado de un pedido y cuándo.
 - Antes de abrir el formulario al público, Víctor Hugo Farfán, como responsable
   de la base, tiene que inscribirla en el Registro Nacional de Bases de Datos de
   la AAIP. El trámite es gratuito y se hace en línea; lo pide el artículo 21 de

@@ -881,6 +881,23 @@ ul{list-style:none}
 }
 .pedido-texto{font-size:var(--t-s);color:var(--gris);margin:0 0 var(--e-3);line-height:1.55}
 .pedido-texto strong{color:var(--tinta)}
+
+/* ---------- renglón de un pedido ----------
+   Lo comparten "Mis pedidos" (cuenta.css) y la pantalla del local
+   (admin.css). Vive acá porque es el único archivo que cargan las
+   dos. */
+.item-cant{color:#8C8396;min-width:2.2em}
+.item-nombre{flex:1}
+.item-nombre small{display:block;color:#8C8396;font-size:var(--t-xs)}
+.item-sub{white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* Texto que leen los lectores de pantalla y no se ve.
+   Para etiquetas de campos cuyo sentido ya está claro mirando,
+   pero que sin etiqueta no se pueden anunciar. */
+.visualmente-oculto{
+  position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+  overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;
+}
 .btn-texto{
   display:block;width:100%;margin-top:var(--e-2);padding:var(--e-2);
   color:var(--gris);font-size:var(--t-xs);border-radius:var(--r-s);

@@ -165,10 +165,9 @@
   padding:var(--e-2) 0;font-size:var(--t-s);
 }
 .pedido-items li + li{border-top:1px solid #F2EDE6}
-.item-cant{color:#8C8396;min-width:2.2em}
-.item-nombre{flex:1}
-.item-nombre small{display:block;color:#8C8396;font-size:var(--t-xs)}
-.item-sub{white-space:nowrap;font-variant-numeric:tabular-nums}
+/* .item-cant, .item-nombre y .item-sub están en style.css: el
+   mismo renglón se usa en "Mis pedidos" y en la pantalla del
+   local, y esa carga style.css pero no este archivo. */
 .pedido-nota{font-size:var(--t-xs);color:#6B6075;margin:var(--e-2) 0 0;line-height:1.55}
 
 @media (max-width:420px){

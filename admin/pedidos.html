@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pedidos — Fiambrería 4 Quesos</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#1B1420">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <script>window.RAIZ = '../';</script>
+</head>
+
+<body class="admin">
+
+  <div class="admin-barra">
+    <div class="contenedor">
+      <div class="admin-marca">4 Quesos <span>Panel de administración</span></div>
+      <nav class="admin-nav">
+        <a href="panel.html">Catálogo</a>
+        <a href="pedidos.html" aria-current="page">Pedidos</a>
+        <a href="tablero.html">Tablero</a>
+        <a href="../index.html">Ver el sitio</a>
+      </nav>
+    </div>
+  </div>
+
+  <main class="admin-seccion">
+    <div class="contenedor">
+
+      <h1>Pedidos</h1>
+      <p class="admin-entrada">Los que entran por el sitio. La lista se actualiza sola
+        cada 45 segundos mientras tengas esta pestaña a la vista.</p>
+
+      <!-- Esta pantalla sí pide sesión, a diferencia de la del
+           catálogo: muestra nombres, teléfonos y compras de otras
+           personas. Quien decide es el servidor. -->
+      <div class="admin-aviso" id="aviso-pedidos" hidden></div>
+
+      <div id="herramientas" hidden>
+        <div id="filtros" class="pedidos-barra" role="group" aria-label="Filtrar por estado"></div>
+        <p class="ped-orden" id="orden-aviso" aria-live="polite"></p>
+
+        <form class="barra-herramientas" id="form-busqueda">
+          <label class="visualmente-oculto" for="f-busqueda">Buscar</label>
+          <input type="search" id="f-busqueda" name="q" placeholder="Buscar por número o nombre…">
+
+          <label class="visualmente-oculto" for="f-sucursal">Sucursal</label>
+          <select id="f-sucursal"></select>
+
+          <button type="button" class="btn btn-ciruela" id="btn-refrescar">Actualizar</button>
+          <span class="ped-meta" id="actualizado" aria-live="polite"></span>
+        </form>
+      </div>
+
+      <div id="lista" aria-live="polite">
+        <p class="ped-vacio">Buscando los pedidos…</p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="pie-admin">
+    <div class="contenedor">
+      <p>Panel interno · Fiambrería 4 Quesos</p>
+    </div>
+  </footer>
+
+  <script src="../assets/js/productos.js"></script>
+  <script src="../assets/js/admin-pedidos.js"></script>
+</body>
+</html>

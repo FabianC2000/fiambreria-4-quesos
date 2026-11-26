@@ -103,3 +103,115 @@ table.admin-tabla tbody tr:last-child td{border-bottom:0}
 .acciones{display:flex;gap:var(--e-3);flex-wrap:wrap;margin-top:var(--e-5)}
 .admin-tarjeta .btn[disabled]{opacity:.45;pointer-events:none}
 .pie-admin{padding:var(--e-6) 0;color:#9C93A6;font-size:var(--t-xs);text-align:center}
+
+/* ============================================================
+   PEDIDOS
+   ============================================================ */
+
+.admin-entrada{color:var(--gris);font-size:var(--t-s);margin:0 0 var(--e-5);max-width:62ch}
+
+/* El aviso del panel es informativo; este es el de algo que salió
+   mal y tiene que distinguirse de un vistazo. */
+.admin-aviso-mal{border-color:#F0CDD2;background:#FBE9EB;color:#7A1C28}
+.admin-aviso-mal a{color:inherit;font-weight:600}
+
+/* ---------- filtros ---------- */
+.pedidos-barra{display:flex;flex-wrap:wrap;gap:var(--e-2);margin-bottom:var(--e-4)}
+.filtro-pill{
+  display:inline-flex;align-items:center;gap:var(--e-2);
+  padding:6px 14px;border-radius:999px;cursor:pointer;
+  border:1px solid #DDD2E4;background:#fff;
+  font:inherit;font-size:var(--t-s);color:var(--tinta);
+  transition:background var(--rapido) var(--sale),border-color var(--rapido) var(--sale);
+}
+.filtro-pill span{
+  font-size:var(--t-xs);color:#6B6075;background:#F2EDE6;
+  padding:1px 7px;border-radius:999px;font-variant-numeric:tabular-nums;
+}
+.filtro-pill:hover{background:#F7F3F9}
+/* El filtro elegido no se distingue solo por el color: también
+   cambia el peso del texto, para quien no separe bien los tonos. */
+.filtro-pill[aria-pressed="true"]{
+  background:var(--ciruela);border-color:var(--ciruela);color:#fff;font-weight:600;
+}
+.filtro-pill[aria-pressed="true"] span{background:rgba(255,255,255,.22);color:#fff}
+
+.barra-herramientas{
+  display:flex;flex-wrap:wrap;gap:var(--e-3);align-items:center;margin-bottom:var(--e-5);
+}
+.barra-herramientas input[type="search"]{
+  flex:1;min-width:220px;padding:10px 14px;border-radius:var(--r-s);
+  border:1px solid #D8CEC0;background:#fff;font:inherit;font-size:var(--t-s);
+}
+.barra-herramientas select{
+  padding:10px 14px;border-radius:var(--r-s);
+  border:1px solid #D8CEC0;background:#fff;font:inherit;font-size:var(--t-s);
+}
+.barra-herramientas .btn{padding:10px 20px}
+
+/* ---------- la tarjeta de un pedido ---------- */
+.tarjeta-ped{
+  background:#fff;border:1px solid #E4DCD1;border-radius:var(--r);
+  padding:var(--e-5);margin-bottom:var(--e-4);
+}
+/* Una barra de color al costado para reconocer el estado sin
+   leer, cuando hay veinte tarjetas en pantalla. La palabra sigue
+   estando escrita en la pastilla. */
+.tarjeta-ped[data-estado="nuevo"]{border-left:4px solid var(--dorado)}
+.tarjeta-ped[data-estado="confirmado"]{border-left:4px solid var(--ciruela)}
+.tarjeta-ped[data-estado="listo"]{border-left:4px solid #1E5233}
+.tarjeta-ped[data-estado="entregado"]{border-left:4px solid #C9C0B4}
+.tarjeta-ped[data-estado="cancelado"]{border-left:4px solid var(--vino);opacity:.72}
+
+.ped-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--e-3)}
+.ped-num{
+  font-family:var(--display);font-size:var(--t-m);margin:0;
+  display:flex;align-items:center;gap:var(--e-2);flex-wrap:wrap;
+}
+.ped-meta{font-size:var(--t-xs);color:#8C8396;margin:2px 0 0}
+.ped-total{font-size:var(--t-l);margin:0;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+.ped-quien{font-size:var(--t-s);margin:var(--e-3) 0 0;color:var(--tinta)}
+.ped-quien a{color:var(--ciruela);font-weight:600}
+
+.ped-items{list-style:none;margin:var(--e-3) 0 0;padding:0}
+.ped-items li{display:flex;align-items:baseline;gap:var(--e-3);padding:var(--e-2) 0;font-size:var(--t-s)}
+.ped-items li + li{border-top:1px solid #F2EDE6}
+
+.ped-nota{
+  margin:var(--e-3) 0 0;padding:var(--e-3);border-radius:var(--r-s);
+  background:#FFF8E8;border:1px solid #F0E0BC;font-size:var(--t-s);line-height:1.55;
+}
+
+/* ---------- cambiar el estado ---------- */
+.ped-estados{
+  display:flex;flex-wrap:wrap;gap:var(--e-2);
+  margin-top:var(--e-4);padding-top:var(--e-4);border-top:1px solid #EFE9E0;
+}
+.btn-estado{
+  padding:7px 14px;border-radius:var(--r-s);cursor:pointer;
+  border:1px solid #DDD2E4;background:#fff;font:inherit;font-size:var(--t-s);color:var(--tinta);
+  transition:background var(--rapido) var(--sale);
+}
+.btn-estado:hover:not(:disabled){background:#F4F0F6}
+/* El estado actual queda marcado y apagado: no se puede volver a
+   elegir lo que ya está. */
+.btn-estado:disabled{
+  background:var(--ciruela);border-color:var(--ciruela);color:#fff;
+  font-weight:600;cursor:default;opacity:1;
+}
+.btn-estado:focus-visible{outline:2px solid var(--ciruela);outline-offset:2px}
+
+.ped-vacio{
+  text-align:center;color:#8C8396;font-size:var(--t-s);
+  padding:var(--e-7) var(--e-4);
+}
+
+@media (max-width:520px){
+  .ped-cab{flex-direction:column}
+  .barra-herramientas input[type="search"]{min-width:100%}
+}
+
+/* En qué orden está la lista: cambia con el filtro, y sin decirlo
+   el salto parece un error de la pantalla. */
+.ped-orden{font-size:var(--t-xs);color:#8C8396;margin:0 0 var(--e-4)}

@@ -164,6 +164,25 @@ function fb_exigir_cliente(): array
     return $c;
 }
 
+/* Para las pantallas del local, que muestran datos de otras
+   personas: nombres, teléfonos, qué compró cada uno.
+
+   El rol se lee de la base en cada pedido, no de la sesión: si
+   alguien deja de ser administrador, deja de serlo en el acto y no
+   cuando se le venza la sesión. (fb_cliente_actual consulta la
+   tabla cada vez, así que eso ya está dado.)
+
+   A quien no es administrador se le contesta 404 y no 403: un 403
+   confirmaría que la pantalla existe. */
+function fb_exigir_admin(): array
+{
+    $c = fb_exigir_cliente();
+    if (($c['rol'] ?? '') !== 'admin') {
+        fb_morir(404, 'No encontré eso.');
+    }
+    return $c;
+}
+
 /* ------------------------------------------------------------
    Validaciones
    ------------------------------------------------------------ */
